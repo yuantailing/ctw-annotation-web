@@ -1,0 +1,5 @@
+*.pyc
+*.log
+
+character/settings.py
+db.sqlite3
