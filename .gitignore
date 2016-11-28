@@ -1,5 +1,8 @@
 *.pyc
 *.log
 
+static/
+media/
+
 character/settings.py
 db.sqlite3

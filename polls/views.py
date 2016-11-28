@@ -4,8 +4,6 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.db.models import F
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
 
 from .models import Choice, Question
 
