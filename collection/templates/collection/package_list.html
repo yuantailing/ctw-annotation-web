@@ -1,0 +1,26 @@
+<h3>Packags of {{ user }}</h3>
+{% if package_list %}
+<table border="1">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Direction</th>
+			<th>#Images</th>
+			<th colspan="2">Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for package in package_list %}
+		<tr>
+			<td>{{ package }}</td>
+			<td>{{ package.direction }}</td>
+			<td>{{ package.num_images }}</td>
+			<td><a href="{% url 'collection:package_detail' package.id %}">Detail</a></td>
+			<td><a href="{% url 'collection:package_download' package.id %}">Download</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+	<p>No packages are available. Please contact admin to distribute a package.</p>
+{% endif %}

@@ -1,0 +1,23 @@
+<h3>{{ package }}</h3>
+<p><a href="{% url 'collection:package_download' package.id %}">Download</a></p>
+<table border="1">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Direction</th>
+			<th>Number</th>
+			<th colspan="2">Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for image in package.image_set.all %}
+		<tr>
+			<td>{{ image }}</td>
+			<td>{{ image.direction }}</td>
+			<td>{{ image.number }}</td>
+			<td><a href="{% url 'collection:image_detail' package.id image.id %}">Detail</a></td>
+			<td><a href="{% url 'collection:image_download' package.id image.id %}">Download</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

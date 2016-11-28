@@ -4,10 +4,10 @@ from . import views
 
 app_name = 'collection'
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
-    url(r'^test$', views.test, name='test'),
-    # url(r'^$', views.IndexView.as_view(), name='index'),
-    # url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
-    # url(r'^(?P<pk>[0-9]+)/results/$', views.ResultsView.as_view(), name='results'),
-    # url(r'^(?P<question_id>[0-9]+)/vote/$', views.vote, name='vote'),
+    url(r'^package/$', views.PackageListView.as_view(), name='index'),
+    url(r'^package/$', views.PackageListView.as_view(), name='package_list'),
+    url(r'^package/(?P<pk>[0-9]+)/$', views.PackageDetailView.as_view(), name='package_detail'),
+    url(r'^package/(?P<pk>[0-9]+)/download/$', views.package_download, name='package_download'),
+    url(r'^package/(?P<package_pk>[0-9]+)/image/(?P<pk>[0-9]+)/$', views.ImageDetailView.as_view(), name='image_detail'),
+    url(r'^package/(?P<package_pk>[0-9]+)/image/(?P<pk>[0-9]+)/download/$', views.image_download, name='image_download'),
 ]

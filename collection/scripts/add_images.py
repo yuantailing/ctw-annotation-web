@@ -7,8 +7,9 @@ import os
 
 @transaction.atomic
 def run(*args):
-    if len(args) < 3:
+    if len(args) != 3:
         print 'Usage: python manage.py runscript add_images --traceback --script-args <direction> <lo> <hi>'
+    assert(len(args) == 3)
     direction = int(args[0])
     lo = int(args[1])
     hi = int(args[2])

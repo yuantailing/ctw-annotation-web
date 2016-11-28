@@ -5,14 +5,14 @@ from .models import User, Package, UserPackage, Image
 
 
 class PackageAdmin(admin.ModelAdmin):
-    class UserPackageInline(admin.TabularInline):
-        model = UserPackage
-        extra = 1
     class ImageInline(admin.TabularInline):
         model = Image
         extra = 1
+    class UserPackageInline(admin.TabularInline):
+        model = UserPackage
+        extra = 1
     inlines = (ImageInline, UserPackageInline)
-    list_display = ('id', '__str__', 'direction', 'num_images', 'num_users')
+    list_display = ('id', '__str__', 'direction', 'num_images', 'num_users', )
     list_filter = ('direction', )
 
 

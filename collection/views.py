@@ -1,20 +1,31 @@
-from django.shortcuts import render
-from django.http import HttpResponse, StreamingHttpResponse, Http404
-
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, FileResponse, StreamingHttpResponse, Http404
+from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
-from . import filename_mapper
+from character import settings
+from collection import filename_mapper
+from .models import Image, Package
 import zipfile
 import os
 import io
 
 # Create your views here.
-@login_required
-def index(request):
-    return render(request, 'collection/index.html', {})
 
-def test(request):
+class PackageListView(LoginRequiredMixin, generic.ListView):
+    def get_queryset(self):
+        return self.request.user.package_set.all()
+
+
+class PackageDetailView(LoginRequiredMixin, generic.DetailView):
+    def get_queryset(self):
+        return self.request.user.package_set.all()
+
+
+@login_required
+def package_download(request, pk):
+    package = get_object_or_404(request.user.package_set.all(), pk=pk)
     def zip_iterator(file_list, compression=zipfile.ZIP_STORED):
         buffer = io.BytesIO()
         zf = zipfile.ZipFile(buffer, mode='w', compression=compression, allowZip64=False)
@@ -31,16 +42,28 @@ def test(request):
             buffer.seek(last_write, 0)
             yield buffer.read(current - last_write)
         buffer.close()
-    direction = 1
-    new_names = ['000016', '000017', '000019', '000020']
     file_list = []
-    for new_name in new_names:
-        old_name = filename_mapper.mapper.new2old[new_name]
-        file_list.append(('Z:/tiger/1_part/%s.%d.jpg' % (old_name, direction), '%d%s.jpg' % (direction, new_name)))
+    for image in package.image_set.all():
+        file_list.append((image.get_file_path(), image.get_distribute_name()))
     response = StreamingHttpResponse(zip_iterator(file_list))
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="task_distributed.zip"'
+    response['Content-Disposition'] = 'attachment;filename="%s.zip"' % package
     for filename in file_list:
         if not os.path.exists(filename[0]):
-            raise ValueError("File not found. It may be a server filesystem issue. Please report this incident to administratior.")
+            raise ValueError("File %s not found. It may be a server filesystem issue. Please report this incident to administratior." % filename[1])
+    return response
+
+
+class ImageDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Image
+    def get_queryset(self):
+        package = get_object_or_404(self.request.user.package_set.all(), pk=self.kwargs['package_pk'])
+        return package.image_set.all()
+
+
+@login_required
+def image_download(request, package_pk, pk):
+    package = get_object_or_404(request.user.package_set.all(), pk=package_pk)
+    image = get_object_or_404(package.image_set, pk=pk)
+    response = FileResponse(open(image.get_file_path(), 'rb'))
+    response['Content-Disposition'] = 'attachment;filename="%s.jpg"' % image.get_distribute_name()
     return response
