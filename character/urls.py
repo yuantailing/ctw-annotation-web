@@ -21,5 +21,4 @@ urlpatterns = [
     url('^accounts/', include('accounts.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^collection/', include('collection.urls')),
-    url(r'^polls/', include('polls.urls')),
 ]
