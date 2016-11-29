@@ -1,26 +1,34 @@
+{% extends "./base.html" %}
+
+{% block content %}
 <h3>Packags of {{ user }}</h3>
-{% if package_list %}
-<table border="1">
+<table class="table table-striped">
 	<thead>
 		<tr>
 			<th>Name</th>
 			<th>Direction</th>
 			<th>#Images</th>
-			<th colspan="2">Action</th>
+			<th>Annotation</th>
+			<th colspan="2">Actions</th>
 		</tr>
 	</thead>
 	<tbody>
-		{% for package in package_list %}
+		{% for userpackage in userpackage_list %}
+		{% with package=userpackage.package %}
 		<tr>
-			<td>{{ package }}</td>
+			<td><a href="{% url 'collection:package_detail' package.id %}">{{ package }}</a></td>
 			<td>{{ package.direction }}</td>
-			<td>{{ package.num_images }}</td>
-			<td><a href="{% url 'collection:package_detail' package.id %}">Detail</a></td>
+			<td>{{ userpackage.package__image__count }}</td>
+			{% if userpackage.upload %}
+			<td><span class="glyphicon glyphicon-ok"></span></td>
+			{% else %}
+			<td><span class="glyphicon glyphicon-remove"></span></td>
+			{% endif %}
 			<td><a href="{% url 'collection:package_download' package.id %}">Download</a></td>
+			<td><a href="{% url 'collection:annotation_upload' package.id %}">Upload Annotations</a></td>
 		</tr>
+		{% endwith %}
 		{% endfor %}
 	</tbody>
 </table>
-{% else %}
-	<p>No packages are available. Please contact admin to distribute a package.</p>
-{% endif %}
+{% endblock %}

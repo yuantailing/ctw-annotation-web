@@ -1,3 +1,11 @@
+{% extends "./base.html" %}
+
+{% block content %}
 <h3>{{ image }}</h3>
-<p><a href="{% url 'collection:image_download' image.package.id image.id %}">Download</a></p>
-<p><img style="max-width:800px;max-height:800px;" src="{% url 'collection:image_download' image.package.id image.id %}" /></p>
+<div>
+	<p>
+		<a href="{% url 'collection:image_download' image.package.id image.id %}" class="btn btn-primary" role="button">Download</a>
+	</p>
+</div>
+<div><img style="max-width:800px;max-height:800px;" src="{% url 'collection:image_download' image.package.id image.id %}" /></div>
+{% endblock %}

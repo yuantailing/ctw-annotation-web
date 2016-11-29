@@ -1,23 +1,36 @@
+{% extends "./base.html" %}
+
+{% block content %}
+{% with package=userpackage.package %}
 <h3>{{ package }}</h3>
-<p><a href="{% url 'collection:package_download' package.id %}">Download</a></p>
-<table border="1">
+<div>
+	<p>
+		<a href="{% url 'collection:package_download' package.id %}" class="btn btn-primary" role="button">Download {{ userpackage.package__image__count }} Images</a>
+		{% if userpackage.upload %}
+		<a href="{% url 'collection:annotation_download' package.id %}" class="btn btn-primary" role="button">Download Annotations</a>
+		{% endif %}
+		<a href="{% url 'collection:annotation_upload' package.id %}" class="btn btn-danger" role="button">Upload Annotations</a>
+	</p>
+</div>
+<table class="table table-striped">
 	<thead>
 		<tr>
 			<th>Name</th>
 			<th>Direction</th>
 			<th>Number</th>
-			<th colspan="2">Action</th>
+			<th colspan="1">Actions</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for image in package.image_set.all %}
 		<tr>
-			<td>{{ image }}</td>
+			<td><a href="{% url 'collection:image_detail' package.id image.id %}">{{ image }}</a></td>
 			<td>{{ image.direction }}</td>
 			<td>{{ image.number }}</td>
-			<td><a href="{% url 'collection:image_detail' package.id image.id %}">Detail</a></td>
 			<td><a href="{% url 'collection:image_download' package.id image.id %}">Download</a></td>
 		</tr>
 		{% endfor %}
 	</tbody>
 </table>
+{% endwith %}
+{% endblock %}

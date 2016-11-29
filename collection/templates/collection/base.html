@@ -1,0 +1,22 @@
+{% load i18n static %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+		<meta content="collection" name="description" />
+		<title>{% block title %}Collection{% endblock %}</title>
+		<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" rel="stylesheet">
+		<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="{% static 'collection/css/style.css' %}" />
+		<script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+		<script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		{% block head %}{% endblock %}
+	</head>
+	<body>
+		{% block nav %}{% include "./nav.html" %}{% endblock %}
+		<div class="container">
+			{% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+			{% block content %}{{ content }}{% endblock %}
+		</div>
+		{% block footer %}{% include "./footer.html" %}{% endblock %}
+	</body>
+</html>

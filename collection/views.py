@@ -1,26 +1,34 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.http import HttpResponse, FileResponse, StreamingHttpResponse, Http404
+from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
+from django.db.models import Count
 from character import settings
 from collection import filename_mapper
-from .models import Image, Package
+from .models import Image, Package, UserPackage
+from .forms import UploadPackageFileForm
 import zipfile
+import time
 import os
 import io
 
 # Create your views here.
 
-class PackageListView(LoginRequiredMixin, generic.ListView):
-    def get_queryset(self):
-        return self.request.user.package_set.all()
+def index(request):
+    return redirect(reverse('collection:package_list'))
 
 
-class PackageDetailView(LoginRequiredMixin, generic.DetailView):
-    def get_queryset(self):
-        return self.request.user.package_set.all()
+def package_list(request):
+    userpackage_list = get_list_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')))
+    return render(request, 'collection/package_list.html', {'userpackage_list': userpackage_list})
+
+
+def package_detail(request, pk):
+    userpackage = get_object_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')), package_id=pk)
+    return render(request, 'collection/package_detail.html', {'userpackage': userpackage})
 
 
 @login_required
@@ -53,6 +61,30 @@ def package_download(request, pk):
     return response
 
 
+def annotation_download(request, pk):
+    userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
+    response = FileResponse(open(userpackage.upload.path, 'rb'))
+    response['Content-Disposition'] = 'attachment;filename="%s.annotation.package"' % userpackage.package
+    return response
+
+
+def annotation_upload(request, pk):
+    user_package = get_object_or_404(request.user.userpackage_set.all(), package__pk=pk)
+    if request.method == 'POST':
+        form = UploadPackageFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            mem_file = request.FILES['annotations']
+            formated_time = time.strftime('%Y-%m-%d-%H%M%S')
+            ext = mem_file.name.split('.')[-1]
+            mem_file.name = 'annotations-%d-%d.%s.%s' % (user_package.user_id, user_package.package_id, formated_time, ext)
+            user_package.upload = mem_file
+            user_package.save()
+            return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
+    else:
+        form = UploadPackageFileForm()
+    return render(request, 'collection/annotation_upload.html', {'package': user_package.package, 'form': form})
+
+
 class ImageDetailView(LoginRequiredMixin, generic.DetailView):
     model = Image
     def get_queryset(self):
@@ -67,3 +99,7 @@ def image_download(request, package_pk, pk):
     response = FileResponse(open(image.get_file_path(), 'rb'))
     response['Content-Disposition'] = 'attachment;filename="%s.jpg"' % image.get_distribute_name()
     return response
+
+
+def tools_index(request):
+    return render(request, 'collection/tools_index.html')

@@ -1,0 +1,26 @@
+{% extends "./base.html" %}
+
+{% block content %}
+<h3>{{ package }}</h3>
+<div>
+	<p>
+		<a href="{% url 'collection:package_detail' package.id %}" class="btn btn-primary" role="button">&lt;&lt; Back</a>
+	</p>
+</div>
+<div class="alert alert-danger" role="alert">
+	<p>警告：重新上传会覆盖之前上传的Annotations</p>
+</div>
+<form class="form-horizontal" method="POST" role="form" enctype="multipart/form-data">
+	{% csrf_token %}
+	<div class="form-group">
+		<label for="{{ form.annotations.name }}" class="col-sm-offset-1 col-sm-2 control-label">{{ form.annotations.label_tag }}</label>
+		<div class="col-sm-6">
+			<input type="file" class="form-control" name="{{ form.annotations.name }}" id="{{ form.annotations.name }}" data-filename-placement="inside" required>
+		</div>
+		{{ form.annotations.errors }}
+	</div>
+	<div class="form-group">
+		<input class="btn btn-danger col-sm-offset-5" type="submit" value="Upload Annotations" />
+	</div>
+</form>
+{% endblock %}

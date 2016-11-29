@@ -4,6 +4,8 @@
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'accounts:index' %}">{% trans 'Home' %}</a></div>{% endblock %}
 
 {% block content %}
+<h2>{{ user }}</h2>
+<p>{{ user.email }}</p>
 <ul>
 	<li><a href="{% url 'accounts:login' %}">Login</a></li>
 	<li><a href="{% url 'accounts:logout' %}">Logout</a></li>

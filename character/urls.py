@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import reverse
 
 urlpatterns = [
+    url('^$', lambda request: redirect(reverse('collection:index')), name='index'),
     url('^accounts/', include('accounts.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^collection/', include('collection.urls')),

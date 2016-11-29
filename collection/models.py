@@ -20,7 +20,7 @@ class Package(models.Model):
     class Meta:
         ordering = ('direction', 'pk', )
     def __str__(self):
-        return 'Package-%d-%05d' % (self.direction, self.id)
+        return 'Package-%d-%04d' % (self.direction, self.id)
     def num_images(self):
         return self.image_set.count()
     def num_users(self):
@@ -30,8 +30,8 @@ class Package(models.Model):
 class UserPackage(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     package = models.ForeignKey(Package, on_delete=models.PROTECT)
-    upload = models.FileField(null=True, blank=True, upload_to='uploads/user_package')
-    feedback = models.FileField(null=True, blank=True, upload_to='feedbacks/user_package')
+    upload = models.FileField(blank=True, upload_to='uploads/user_package')
+    feedback = models.FileField(blank=True, upload_to='feedbacks/user_package')
     validation = models.TextField(blank=True, default='')
     class Meta:
         unique_together = ("user", "package", )
@@ -40,7 +40,7 @@ class UserPackage(models.Model):
 
 
 class Image(models.Model):
-    package = models.ForeignKey(Package, null=True, blank=True, on_delete=models.SET_NULL)
+    package = models.ForeignKey(Package, null=True, blank=True, default=None, on_delete=models.SET_NULL)
     direction = models.IntegerField(db_index=True, default=None)
     number = models.CharField(max_length=64, db_index=True)
     class Meta:
