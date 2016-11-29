@@ -21,11 +21,13 @@ def index(request):
     return redirect(reverse('collection:package_list'))
 
 
+@login_required
 def package_list(request):
     userpackage_list = get_list_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')))
     return render(request, 'collection/package_list.html', {'userpackage_list': userpackage_list})
 
 
+@login_required
 def package_detail(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')), package_id=pk)
     return render(request, 'collection/package_detail.html', {'userpackage': userpackage})
@@ -61,6 +63,7 @@ def package_download(request, pk):
     return response
 
 
+@login_required
 def annotation_download(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
     response = FileResponse(open(userpackage.upload.path, 'rb'))
@@ -68,21 +71,22 @@ def annotation_download(request, pk):
     return response
 
 
+@login_required
 def annotation_upload(request, pk):
-    user_package = get_object_or_404(request.user.userpackage_set.all(), package__pk=pk)
+    userpackage = get_object_or_404(request.user.userpackage_set.all(), package__pk=pk)
     if request.method == 'POST':
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():
             mem_file = request.FILES['annotations']
             formated_time = time.strftime('%Y-%m-%d-%H%M%S')
             ext = mem_file.name.split('.')[-1]
-            mem_file.name = 'annotations-%d-%d.%s.%s' % (user_package.user_id, user_package.package_id, formated_time, ext)
-            user_package.upload = mem_file
-            user_package.save()
+            mem_file.name = 'annotations-%d-%d.%s.%s' % (userpackage.user_id, userpackage.package_id, formated_time, ext)
+            userpackage.upload = mem_file
+            userpackage.save()
             return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
     else:
         form = UploadPackageFileForm()
-    return render(request, 'collection/annotation_upload.html', {'package': user_package.package, 'form': form})
+    return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form})
 
 
 class ImageDetailView(LoginRequiredMixin, generic.DetailView):
@@ -101,5 +105,5 @@ def image_download(request, package_pk, pk):
     return response
 
 
-def tools_index(request):
-    return render(request, 'collection/tools_index.html')
+def help(request):
+    return render(request, 'collection/help.html')

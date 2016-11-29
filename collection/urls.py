@@ -12,5 +12,5 @@ urlpatterns = [
     url(r'^package/(?P<pk>[0-9]+)/annotation/upload/$', views.annotation_upload, name='annotation_upload'),
     url(r'^package/(?P<package_pk>[0-9]+)/image/(?P<pk>[0-9]+)/$', views.ImageDetailView.as_view(), name='image_detail'),
     url(r'^package/(?P<package_pk>[0-9]+)/image/(?P<pk>[0-9]+)/download/$', views.image_download, name='image_download'),
-    url(r'^tools/$', views.tools_index, name='tools_index'),
+    url(r'^help/$', views.help, name='help'),
 ]

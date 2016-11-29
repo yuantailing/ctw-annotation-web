@@ -30,8 +30,8 @@ class Package(models.Model):
 class UserPackage(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     package = models.ForeignKey(Package, on_delete=models.PROTECT)
-    upload = models.FileField(blank=True, upload_to='uploads/user_package')
-    feedback = models.FileField(blank=True, upload_to='feedbacks/user_package')
+    upload = models.FileField(blank=True, upload_to='collection/uploads/userpackage')
+    feedback = models.FileField(blank=True, upload_to='collection/feedbacks/userpackage')
     validation = models.TextField(blank=True, default='')
     class Meta:
         unique_together = ("user", "package", )
