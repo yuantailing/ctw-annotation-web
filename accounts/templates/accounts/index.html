@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></div>{% endblock %}
+
+{% block content %}
+<ul>
+	<li><a href="{% url 'accounts:login' %}">Login</a></li>
+	<li><a href="{% url 'accounts:logout' %}">Logout</a></li>
+	<li><a href="{% url 'accounts:password_change' %}">Change Password</a></li>
+	<li><a href="{% url 'accounts:admin_password_reset' %}">Reset Password</a></li>
+</ul>
+{% endblock %}
