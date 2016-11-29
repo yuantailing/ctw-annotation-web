@@ -23,7 +23,7 @@ def index(request):
 
 @login_required
 def package_list(request):
-    userpackage_list = get_list_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')))
+    userpackage_list = request.user.userpackage_set.select_related('package').annotate(Count('package__image'))
     return render(request, 'collection/package_list.html', {'userpackage_list': userpackage_list})
 
 
