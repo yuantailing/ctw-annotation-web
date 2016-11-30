@@ -4,8 +4,9 @@
 <h3>{{ image }}</h3>
 <div>
 	<p>
-		<a href="{% url 'collection:image_download' image.package.id image.id %}" class="btn btn-primary" role="button">Download</a>
+		<a href="{% url 'collection:package_detail' image.package_id %}" class="btn btn-primary" role="button">&lt;&lt Back</a>
+		<a href="{% url 'collection:image_download' image.package_id image.id %}" class="btn btn-primary" role="button">Download</a>
 	</p>
 </div>
-<div><img style="max-width:800px;max-height:800px;" src="{% url 'collection:image_download' image.package.id image.id %}" /></div>
+<div><img style="max-width:800px;max-height:800px;" src="{% url 'collection:image_download' image.package_id image.id %}" /></div>
 {% endblock %}

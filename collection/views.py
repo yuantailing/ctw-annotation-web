@@ -22,6 +22,20 @@ def index(request):
 
 
 @login_required
+def ask_for_package(request):
+    if request.method == 'POST':
+        if request.user.userpackage_set.filter(upload='').count():
+            return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
+        package = Package.objects.annotate(Count('users')).order_by('users__count', 'direction', 'id').filter(users__count__lt=1).first()
+        if not package:
+            return render(request, 'collection/ask_for_package.html', {'error_message': 'No package avaliable, please contact the administrator.'})
+        UserPackage.objects.create(user=request.user, package=package)
+        return redirect(reverse('collection:package_list'))
+    else:
+        return render(request, 'collection/ask_for_package.html', {'error_message': None})
+
+
+@login_required
 def package_list(request):
     userpackage_list = request.user.userpackage_set.select_related('package').annotate(Count('package__image'))
     return render(request, 'collection/package_list.html', {'userpackage_list': userpackage_list})
@@ -35,7 +49,7 @@ def package_detail(request, pk):
 
 @login_required
 def package_download(request, pk):
-    package = get_object_or_404(request.user.package_set.all(), pk=pk)
+    package = get_object_or_404(request.user.package_set, pk=pk)
     def zip_iterator(file_list, compression=zipfile.ZIP_STORED):
         buffer = io.BytesIO()
         zf = zipfile.ZipFile(buffer, mode='w', compression=compression, allowZip64=False)
@@ -73,13 +87,13 @@ def annotation_download(request, pk):
 
 @login_required
 def annotation_upload(request, pk):
-    userpackage = get_object_or_404(request.user.userpackage_set.all(), package__pk=pk)
+    userpackage = get_object_or_404(request.user.userpackage_set, package__pk=pk)
     if request.method == 'POST':
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():
             mem_file = request.FILES['annotations']
             formated_time = time.strftime('%Y-%m-%d-%H%M%S')
-            ext = mem_file.name.split('.')[-1]
+            ext = 'package'
             mem_file.name = 'annotations-%d-%d.%s.%s' % (userpackage.user_id, userpackage.package_id, formated_time, ext)
             userpackage.upload = mem_file
             userpackage.save()
@@ -92,13 +106,13 @@ def annotation_upload(request, pk):
 class ImageDetailView(LoginRequiredMixin, generic.DetailView):
     model = Image
     def get_queryset(self):
-        package = get_object_or_404(self.request.user.package_set.all(), pk=self.kwargs['package_pk'])
-        return package.image_set.all()
+        package = get_object_or_404(self.request.user.package_set, pk=self.kwargs['package_pk'])
+        return package.image_set
 
 
 @login_required
 def image_download(request, package_pk, pk):
-    package = get_object_or_404(request.user.package_set.all(), pk=package_pk)
+    package = get_object_or_404(request.user.package_set, pk=package_pk)
     image = get_object_or_404(package.image_set, pk=pk)
     response = FileResponse(open(image.get_file_path(), 'rb'))
     response['Content-Disposition'] = 'attachment;filename="%s.jpg"' % image.get_distribute_name()

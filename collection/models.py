@@ -33,6 +33,8 @@ class UserPackage(models.Model):
     upload = models.FileField(blank=True, upload_to='collection/uploads/userpackage')
     feedback = models.FileField(blank=True, upload_to='collection/feedbacks/userpackage')
     validation = models.TextField(blank=True, default='')
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together = ("user", "package", )
     def __str__(self):

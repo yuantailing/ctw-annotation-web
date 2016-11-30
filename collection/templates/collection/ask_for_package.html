@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+
+{% block content %}
+<h3>Ask for more packages</h3>
+{% if error_message %}
+<div class="alert alert-danger" role="alert">
+	<p>{{ error_message }}</p>
+</div>
+{% endif %}
+<div class="alert alert-warning" role="alert">
+	<p>Requirements</p>
+	<ol>
+		<li>对于已分发的每个包，必须都已上传标注，申请才会生效。</li>
+		<li>该操作不能撤销。</li>
+	</ol>
+	<form class="form-horizontal" method="POST" role="form" enctype="multipart/form-data">
+		{% csrf_token %}
+		<p style="text-align:center">
+			<input class="btn btn-danger" type="submit" value="Confirm" />
+		</p>
+	</form>
+</div>
+{% endblock %}
