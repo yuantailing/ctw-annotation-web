@@ -26,7 +26,7 @@ def ask_for_package(request):
     if request.method == 'POST':
         if request.user.userpackage_set.filter(upload='').count():
             return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
-        package = Package.objects.annotate(Count('users')).order_by('users__count', 'direction', 'id').filter(users__count__lt=1).first()
+        package = Package.objects.select_for_update().exclude(users__id__contains=request.user.id).annotate(Count('users')).filter(users__count__lt=2).order_by('-users__count', 'direction', 'id').first()
         if not package:
             return render(request, 'collection/ask_for_package.html', {'error_message': 'No package avaliable, please contact the administrator.'})
         UserPackage.objects.create(user=request.user, package=package)
@@ -87,7 +87,7 @@ def annotation_download(request, pk):
 
 @login_required
 def annotation_upload(request, pk):
-    userpackage = get_object_or_404(request.user.userpackage_set, package__pk=pk)
+    userpackage = get_object_or_404(request.user.userpackage_set.select_for_update(), package__pk=pk)
     if request.method == 'POST':
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():

@@ -22,7 +22,7 @@
 			{% if userpackage.upload %}
 			<td><span class="glyphicon glyphicon-ok"></span></td>
 			{% else %}
-			<td><span class="glyphicon glyphicon-remove"></span></td>
+			<td><span class="glyphicon glyphicon-minus"></span></td>
 			{% endif %}
 			<td><a href="{% url 'collection:package_download' package.id %}">Download</a></td>
 			<td><a href="{% url 'collection:annotation_upload' package.id %}">Upload Annotations</a></td>

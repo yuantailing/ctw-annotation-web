@@ -39,6 +39,8 @@ class UserPackage(models.Model):
         unique_together = ("user", "package", )
     def __str__(self):
         return 'UserPackage(%s, %s)' % (self.user.__str__(), self.package.__str__())
+    def annotation_uploaded(self):
+        return self.upload != ''
 
 
 class Image(models.Model):

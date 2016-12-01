@@ -16,6 +16,11 @@ class PackageAdmin(admin.ModelAdmin):
     list_filter = ('direction', )
 
 
+class UserPackageAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'user', 'package', 'annotation_uploaded', 'create_time', 'update_time', )
+    list_filter = ('user', 'package', )
+
+
 class ImageAdmin(admin.ModelAdmin):
     fieldsets = ((None, {
             'fields': ('package', 'direction', 'number', )
@@ -26,5 +31,5 @@ class ImageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Package, PackageAdmin)
-admin.site.register(UserPackage)
+admin.site.register(UserPackage, UserPackageAdmin)
 admin.site.register(Image, ImageAdmin)
