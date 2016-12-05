@@ -25,7 +25,7 @@ SECRET_KEY = 'fw3n-^salq93=2q#y)uoy6kvcsyk)wi^!s#vg_)j)i47be7yi7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -57,7 +57,7 @@ ROOT_URLCONF = 'character.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,4 +131,4 @@ EMAIL_HOST = 'smtp.qiye.163.com'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 ADMINS = [('yuantailing', 'yuantailing@126.com')]
-LOGIN_REDIRECT_URL = 'collection:index'
+LOGIN_REDIRECT_URL = 'index'

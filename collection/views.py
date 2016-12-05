@@ -11,6 +11,8 @@ from collection import filename_mapper
 from .models import Image, Package, UserPackage
 from .forms import UploadPackageFileForm
 import zipfile
+import subprocess
+import json
 import time
 import os
 import io
@@ -44,7 +46,30 @@ def package_list(request):
 @login_required
 def package_detail(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')), package_id=pk)
-    return render(request, 'collection/package_detail.html', {'userpackage': userpackage})
+    validation = json.loads(userpackage.validation) if userpackage.validation else dict() # todo: check json in scripts/collection_check
+    image_info = []
+    character_cnt = 0
+    character_pass = 0
+    for image in userpackage.package.image_set.all():
+        info = validation[image.get_distribute_name()] if image.get_distribute_name() in validation else dict()
+        if 'numBlock' not in info: info['numBlock'] = None
+        if 'numCharacter' not in info: info['numCharacter'] = None
+        if 'error' not in info or 'miss' not in info or 'reduntant' not in info:
+            info['hasCross'] = False
+            info['error'] = info['miss'] = info['reduntant'] = None
+            thispass = None
+        else:
+            info['hasCross'] = True
+            character_cnt += info['numCharacter'] or 0
+            thispass = max(0, (info['numCharacter'] or 0) - (info['error'] or 0) - (info['miss'] or 0) - (info['reduntant'] or 0))
+            character_pass += thispass
+            if info['numCharacter']:
+                thispass = '%.2f %%' % thispass * 100.0 / info['numCharacter']
+            else:
+                thispass = '-'
+        image_info.append({'id': image.id, 'title': image.__str__(), 'direction': image.direction, 'number': image.number, 'numBlock': info['numBlock'], 'numCharacter': info['numCharacter'],
+            'hasCross': info['hasCross'], 'error': info['error'], 'miss': info['miss'], 'reduntant': info['reduntant'], 'pass': thispass})
+    return render(request, 'collection/package_detail.html', {'userpackage': userpackage, 'image_info': image_info})
 
 
 @login_required
@@ -68,7 +93,7 @@ def package_download(request, pk):
         buffer.close()
     file_list = []
     for image in package.image_set.all():
-        file_list.append((image.get_file_path(), image.get_distribute_name()))
+        file_list.append((image.get_file_path(), '%s.jpg' % image.get_distribute_name()))
     response = StreamingHttpResponse(zip_iterator(file_list))
     response['Content-Disposition'] = 'attachment;filename="%s.zip"' % package
     for filename in file_list:
@@ -87,7 +112,7 @@ def annotation_download(request, pk):
 
 @login_required
 def annotation_upload(request, pk):
-    userpackage = get_object_or_404(request.user.userpackage_set.select_for_update(), package__pk=pk)
+    userpackage = get_object_or_404(request.user.userpackage_set.select_for_update(), package_id=pk)
     if request.method == 'POST':
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -97,6 +122,27 @@ def annotation_upload(request, pk):
             mem_file.name = 'annotations-%d-%d.%s.%s' % (userpackage.user_id, userpackage.package_id, formated_time, ext)
             userpackage.upload = mem_file
             userpackage.save()
+            other = UserPackage.objects.filter(package_id=pk).exclude(user_id=request.user.id).order_by('user_id').first()
+            if other == None:
+                exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
+                p = subprocess.Popen([exe, '-s', userpackage.upload.path], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                p.stdin.close()
+                res = ''
+                while True:
+                    more = p.stdout.read()
+                    if (more == ''): break
+                    res += more
+                p.wait()
+                assert(p.returncode == 0)
+                res += p.stdout.read()
+                res = json.loads(res)
+                assert(res["error"] == 0)
+                res = res["images"];
+                validation = dict()
+                for image in res:
+                    validation[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
+                userpackage.validation = json.dumps(validation)
+                userpackage.save()
             return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
     else:
         form = UploadPackageFileForm()

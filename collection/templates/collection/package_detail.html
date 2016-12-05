@@ -18,15 +18,28 @@
 			<th>Name</th>
 			<th>Direction</th>
 			<th>Number</th>
+			<th>#Blk</th>
+			<th>#Char</th>
+			<th>错 / 漏 / 多</th>
+			<th>Pass (%)</th>
 			<th colspan="1">Actions</th>
 		</tr>
 	</thead>
 	<tbody>
-		{% for image in package.image_set.all %}
+		{% for image in image_info %}
 		<tr>
-			<td><a href="{% url 'collection:image_detail' package.id image.id %}">{{ image }}</a></td>
+			<td><a href="{% url 'collection:image_detail' package.id image.id %}">{{ image.title }}</a></td>
 			<td>{{ image.direction }}</td>
 			<td>{{ image.number }}</td>
+			<td>{{ image.numBlock }}</td>
+			<td>{{ image.numCharacter }}</td>
+			{% if image.hasCross %}
+			<td>{{ image.error }} / {{ image.miss }} / {{ image.reduntant }}</td>
+			<td>{{ image.pass }}</td>
+			{% else %}
+			<td>N/A</td>
+			<td>N/A</td>
+			{% endif %}
 			<td><a href="{% url 'collection:image_download' package.id image.id %}">Download</a></td>
 		</tr>
 		{% endfor %}
