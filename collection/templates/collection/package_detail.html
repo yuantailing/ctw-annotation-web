@@ -12,7 +12,35 @@
 		<a href="{% url 'collection:annotation_upload' package.id %}" class="btn btn-danger" role="button">Upload Annotations</a>
 	</p>
 </div>
-<table class="table table-striped">
+{% if statistics %}
+<table class="table table-striped table-hover table-condensed">
+	<thead>
+		<tr>
+			<th>已交叉验证的图片数</th>
+			<th>#Blk 词组数</th>
+			<th>#Char 字数</th>
+			<th>#error 错标</th>
+			<th>#miss 漏标</th>
+			<th>#reduntant 多标</th>
+			<th>Workload 工作量</th>
+			<th>Pass (%) 通过率</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>{{ statistics.num_image }}</th>
+			<th>{{ statistics.num_block }}</th>
+			<th>{{ statistics.num_character }}</th>
+			<th>{{ statistics.num_error }}</th>
+			<th>{{ statistics.num_miss }}</th>
+			<th>{{ statistics.num_reduntant }}</th>
+			<th>{{ statistics.workload }}</th>
+			<th>{{ statistics.pass }}</th>
+		</tr>
+	</tbody>
+</table>
+{% endif %}
+<table class="table table-striped table-hover table-condensed">
 	<thead>
 		<tr>
 			<th>Name</th>
@@ -31,14 +59,17 @@
 			<td><a href="{% url 'collection:image_detail' package.id image.id %}">{{ image.title }}</a></td>
 			<td>{{ image.direction }}</td>
 			<td>{{ image.number }}</td>
-			<td>{{ image.numBlock }}</td>
-			<td>{{ image.numCharacter }}</td>
-			{% if image.hasCross %}
-			<td>{{ image.error }} / {{ image.miss }} / {{ image.reduntant }}</td>
-			<td>{{ image.pass }}</td>
+			{% if image.stat %}
+			<td>{{ image.stat.numBlock }}</td>
+			<td>{{ image.stat.numCharacter }}</td>
 			{% else %}
-			<td>N/A</td>
-			<td>N/A</td>
+			<td colspan="2">Not uploaded yet</td>
+			{% endif %}
+			{% if image.feed %}
+			<td>{{ image.feed.error }} / {{ image.feed.miss }} / {{ image.feed.reduntant }}</td>
+			<td>{{ image.feed.pass }}</td>
+			{% else %}
+			<td colspan="2">No feedbacks avaliable</td>
 			{% endif %}
 			<td><a href="{% url 'collection:image_download' package.id image.id %}">Download</a></td>
 		</tr>

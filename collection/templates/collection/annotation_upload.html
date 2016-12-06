@@ -7,6 +7,12 @@
 		<a href="{% url 'collection:package_detail' package.id %}" class="btn btn-primary" role="button">&lt;&lt; Back</a>
 	</p>
 </div>
+{% if error_message %}
+<div class="alert alert-danger" role="alert">
+	<p>错误信息：{{ error_message }}</p>
+	<p>请上传正确导出的标注包</p>
+</div>
+{% endif %}
 <div class="alert alert-danger" role="alert">
 	<p>警告：重新上传会覆盖之前上传的Annotations</p>
 </div>

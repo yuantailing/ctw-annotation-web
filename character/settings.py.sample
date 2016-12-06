@@ -123,7 +123,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 IMAGE_DATA_ROOT = 'example/'
 EMAIL_HOST_USER = 'example@example.com'
 EMAIL_HOST_PASSWORD = '********'

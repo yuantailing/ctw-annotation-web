@@ -30,9 +30,9 @@ class Package(models.Model):
 class UserPackage(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     package = models.ForeignKey(Package, on_delete=models.PROTECT)
-    upload = models.FileField(blank=True, upload_to='collection/uploads/userpackage')
-    feedback = models.FileField(blank=True, upload_to='collection/feedbacks/userpackage')
-    validation = models.TextField(blank=True, default='')
+    upload = models.BinaryField(null=True, default=None)
+    feedback = models.TextField(blank=True)
+    statistics = models.TextField(blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     class Meta:
@@ -40,13 +40,13 @@ class UserPackage(models.Model):
     def __str__(self):
         return 'UserPackage(%s, %s)' % (self.user.__str__(), self.package.__str__())
     def annotation_uploaded(self):
-        return self.upload != ''
+        return self.upload != None
 
 
 class Image(models.Model):
     package = models.ForeignKey(Package, null=True, blank=True, default=None, on_delete=models.SET_NULL)
     direction = models.IntegerField(db_index=True, default=None)
-    number = models.CharField(max_length=64, db_index=True)
+    number = models.CharField(max_length=64, db_index=True, default=None)
     class Meta:
         unique_together = ("direction", "number", )
         ordering = ('direction', 'number', )

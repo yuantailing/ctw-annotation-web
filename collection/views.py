@@ -5,6 +5,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
+from django.db import transaction
 from django.db.models import Count
 from character import settings
 from collection import filename_mapper
@@ -12,6 +13,7 @@ from .models import Image, Package, UserPackage
 from .forms import UploadPackageFileForm
 import zipfile
 import subprocess
+import base64
 import json
 import time
 import os
@@ -26,7 +28,7 @@ def index(request):
 @login_required
 def ask_for_package(request):
     if request.method == 'POST':
-        if request.user.userpackage_set.filter(upload='').count():
+        if request.user.userpackage_set.filter(upload__isnull=True).count():
             return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
         package = Package.objects.select_for_update().exclude(users__id__contains=request.user.id).annotate(Count('users')).filter(users__count__lt=2).order_by('-users__count', 'direction', 'id').first()
         if not package:
@@ -46,30 +48,44 @@ def package_list(request):
 @login_required
 def package_detail(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')), package_id=pk)
-    validation = json.loads(userpackage.validation) if userpackage.validation else dict() # todo: check json in scripts/collection_check
+    statistics = json.loads(userpackage.statistics) if userpackage.statistics else dict() # todo: check json in scripts/collection_check
+    feedback = json.loads(userpackage.feedback) if userpackage.feedback else dict() # todo: check json in scripts/collection_check
     image_info = []
+    num_image = 0
+    num_block = 0
+    num_character = 0
+    num_error = 0
+    num_miss = 0
+    num_reduntant = 0
     character_cnt = 0
     character_pass = 0
     for image in userpackage.package.image_set.all():
-        info = validation[image.get_distribute_name()] if image.get_distribute_name() in validation else dict()
-        if 'numBlock' not in info: info['numBlock'] = None
-        if 'numCharacter' not in info: info['numCharacter'] = None
-        if 'error' not in info or 'miss' not in info or 'reduntant' not in info:
-            info['hasCross'] = False
-            info['error'] = info['miss'] = info['reduntant'] = None
-            thispass = None
-        else:
-            info['hasCross'] = True
-            character_cnt += info['numCharacter'] or 0
-            thispass = max(0, (info['numCharacter'] or 0) - (info['error'] or 0) - (info['miss'] or 0) - (info['reduntant'] or 0))
-            character_pass += thispass
-            if info['numCharacter']:
-                thispass = '%.2f %%' % thispass * 100.0 / info['numCharacter']
+        stat = statistics[image.get_distribute_name()] if image.get_distribute_name() in statistics else None
+        feed = feedback[image.get_distribute_name()] if image.get_distribute_name() in feedback else None
+        feeddisplay = None
+        if feed:
+            feeddisplay = dict()
+            feeddisplay['error'] = len(feed['error'])
+            feeddisplay['miss'] = len(feed['miss'])
+            feeddisplay['reduntant'] = len(feed['reduntant'])
+            thiscnt = (stat['numCharacter'] if stat else 0) + feeddisplay['miss']
+            thispass = max(0, thiscnt - feeddisplay['error'] - feeddisplay['miss'] - feeddisplay['reduntant'])
+            num_image += 1
+            num_block += stat['numBlock'] if stat else 0
+            num_character += stat['numCharacter'] if stat else 0
+            num_error += feeddisplay['error']
+            num_miss += feeddisplay['miss']
+            num_reduntant += feeddisplay['reduntant']
+            if thiscnt:
+                feeddisplay['pass'] = '%.2f %%' % (thispass * 100.0 / thiscnt)
             else:
-                thispass = '-'
-        image_info.append({'id': image.id, 'title': image.__str__(), 'direction': image.direction, 'number': image.number, 'numBlock': info['numBlock'], 'numCharacter': info['numCharacter'],
-            'hasCross': info['hasCross'], 'error': info['error'], 'miss': info['miss'], 'reduntant': info['reduntant'], 'pass': thispass})
-    return render(request, 'collection/package_detail.html', {'userpackage': userpackage, 'image_info': image_info})
+                feeddisplay['pass'] = '#DIV/0!'
+        image_info.append({'id': image.id, 'title': image.__str__(), 'direction': image.direction, 'number': image.number, 'stat': stat, 'feed': feeddisplay})
+    statcnt = num_character + num_miss
+    statpass = max(0, statcnt - num_error - num_miss - num_reduntant)
+    statistics = {'num_image': num_image, 'num_block': num_block, 'num_character': num_character, 'num_error': num_error, 'num_miss': num_miss, 'num_reduntant': num_reduntant,
+        'workload': num_block * 2 + num_character,'pass': '%.2f %%' % (statpass * 100.0 / statcnt)} if num_character else None
+    return render(request, 'collection/package_detail.html', {'userpackage': userpackage, 'image_info': image_info, 'statistics': statistics})
 
 
 @login_required
@@ -105,11 +121,12 @@ def package_download(request, pk):
 @login_required
 def annotation_download(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
-    response = FileResponse(open(userpackage.upload.path, 'rb'))
+    response = FileResponse(userpackage.upload)
     response['Content-Disposition'] = 'attachment;filename="%s.annotation.package"' % userpackage.package
     return response
 
 
+@transaction.atomic
 @login_required
 def annotation_upload(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_for_update(), package_id=pk)
@@ -117,32 +134,46 @@ def annotation_upload(request, pk):
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():
             mem_file = request.FILES['annotations']
-            formated_time = time.strftime('%Y-%m-%d-%H%M%S')
-            ext = 'package'
-            mem_file.name = 'annotations-%d-%d.%s.%s' % (userpackage.user_id, userpackage.package_id, formated_time, ext)
-            userpackage.upload = mem_file
+            userpackage.upload = mem_file.read()
+            exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
+            p = subprocess.Popen([exe, '-s'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            res, junk = p.communicate('%s\n' % base64.b64encode(userpackage.upload))
+            p.wait()
+            assert(p.returncode == 0)
+            res = json.loads(res, encoding='utf-8')
+            if (res["error"] != 0):
+                return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': res["errorMessage"]})
+            res = res["images"]
+            statistics = dict()
+            if True: # check image set
+                image_diff = set()
+                for image in userpackage.package.image_set.all():
+                    image_diff.add(image.get_distribute_name())
+                for image in res:
+                    if image not in image_diff:
+                        return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is not in this package, but you uploaded it.' % image})
+                    image_diff.remove(image)
+                    statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
+                if len(image_diff) != 0:
+                    return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is in this package, but you didn\'t upload it.' % image_diff.pop()})
+            else: # do not check image set
+                for image in res:
+                    statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
+            userpackage.statistics = json.dumps(statistics)
             userpackage.save()
+            UserPackage.objects.filter(package_id=pk).update(feedback='')
             other = UserPackage.objects.filter(package_id=pk).exclude(user_id=request.user.id).order_by('user_id').first()
-            if other == None:
-                exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
-                p = subprocess.Popen([exe, '-s', userpackage.upload.path], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                p.stdin.close()
-                res = ''
-                while True:
-                    more = p.stdout.read()
-                    if (more == ''): break
-                    res += more
+            if other and other.upload:
+                p = subprocess.Popen([exe, '-r', '0.80'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                res, junk = p.communicate('%s\n%s\n' % (base64.b64encode(userpackage.upload), base64.b64encode(other.upload)))
                 p.wait()
                 assert(p.returncode == 0)
-                res += p.stdout.read()
-                res = json.loads(res)
+                res = json.loads(res, encoding='utf-8')
                 assert(res["error"] == 0)
-                res = res["images"];
-                validation = dict()
-                for image in res:
-                    validation[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
-                userpackage.validation = json.dumps(validation)
+                userpackage.feedback = json.dumps(res["feedback1"])
+                other.feedback = json.dumps(res["feedback2"])
                 userpackage.save()
+                other.save()
             return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
     else:
         form = UploadPackageFileForm()
