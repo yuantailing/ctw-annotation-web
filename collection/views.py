@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import models as auth_models
 
 from django.db import transaction
 from django.db.models import Count
@@ -28,12 +29,13 @@ def index(request):
 @login_required
 def ask_for_package(request):
     if request.method == 'POST':
-        if request.user.userpackage_set.filter(upload__isnull=True).count():
-            return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
-        package = Package.objects.select_for_update().exclude(users__id__contains=request.user.id).annotate(Count('users')).filter(users__count__lt=2).order_by('-users__count', 'direction', 'id').first()
-        if not package:
-            return render(request, 'collection/ask_for_package.html', {'error_message': 'No package avaliable, please contact the administrator.'})
-        UserPackage.objects.create(user=request.user, package=package)
+        with transaction.atomic():
+            package = Package.objects.select_for_update().exclude(users__id__contains=request.user.id).annotate(Count('users')).filter(users__count__lt=2).order_by('-users__count', 'direction', 'id').first()
+            if request.user.userpackage_set.filter(upload__isnull=True).count() != 0:
+                return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
+            if not package:
+                return render(request, 'collection/ask_for_package.html', {'error_message': 'No package avaliable, please contact the administrator.'})
+            UserPackage.objects.create(user=request.user, package=package)
         return redirect(reverse('collection:package_list'))
     else:
         return render(request, 'collection/ask_for_package.html', {'error_message': None})
@@ -49,7 +51,7 @@ def package_list(request):
 def package_detail(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package').annotate(Count('package__image')), package_id=pk)
     statistics = json.loads(userpackage.statistics) if userpackage.statistics else dict() # todo: check json in scripts/collection_check
-    feedback = json.loads(userpackage.feedback) if userpackage.feedback else dict() # todo: check json in scripts/collection_check
+    feedback = json.loads(userpackage.feedback) if userpackage.feedback else dict()
     image_info = []
     num_image = 0
     num_block = 0
@@ -114,70 +116,88 @@ def package_download(request, pk):
     response['Content-Disposition'] = 'attachment;filename="%s.zip"' % package
     for filename in file_list:
         if not os.path.exists(filename[0]):
-            raise ValueError("File %s not found. It may be a server filesystem issue. Please report this incident to administratior." % filename[1])
+            raise ValueError("File %s not found. A server error occurred. Please contact the administrator." % filename[1])
     return response
 
 
 @login_required
 def annotation_download(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
-    response = FileResponse(userpackage.upload)
-    response['Content-Disposition'] = 'attachment;filename="%s.annotation.package"' % userpackage.package
+    response = HttpResponse(userpackage.upload)
+    response['Content-Disposition'] = 'attachment;filename="%s.annotation.pack"' % userpackage.package
     return response
 
 
-@transaction.atomic
 @login_required
 def annotation_upload(request, pk):
-    userpackage = get_object_or_404(request.user.userpackage_set.select_for_update(), package_id=pk)
     if request.method == 'POST':
         form = UploadPackageFileForm(request.POST, request.FILES)
         if form.is_valid():
             mem_file = request.FILES['annotations']
-            userpackage.upload = mem_file.read()
-            exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
-            p = subprocess.Popen([exe, '-s'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            res, junk = p.communicate('%s\n' % base64.b64encode(userpackage.upload))
-            p.wait()
-            assert(p.returncode == 0)
-            res = json.loads(res, encoding='utf-8')
-            if (res["error"] != 0):
-                return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': res["errorMessage"]})
-            res = res["images"]
-            statistics = dict()
-            if True: # check image set
-                image_diff = set()
-                for image in userpackage.package.image_set.all():
-                    image_diff.add(image.get_distribute_name())
-                for image in res:
-                    if image not in image_diff:
-                        return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is not in this package, but you uploaded it.' % image})
-                    image_diff.remove(image)
-                    statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
-                if len(image_diff) != 0:
-                    return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is in this package, but you didn\'t upload it.' % image_diff.pop()})
-            else: # do not check image set
-                for image in res:
-                    statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
-            userpackage.statistics = json.dumps(statistics)
-            userpackage.save()
-            UserPackage.objects.filter(package_id=pk).update(feedback='')
-            other = UserPackage.objects.filter(package_id=pk).exclude(user_id=request.user.id).order_by('user_id').first()
-            if other and other.upload:
-                p = subprocess.Popen([exe, '-r', '0.80'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                res, junk = p.communicate('%s\n%s\n' % (base64.b64encode(userpackage.upload), base64.b64encode(other.upload)))
+            if mem_file.size > 3 * 1024 * 1024:
+                return render(request, 'collection/annotation_upload.html', {'package': get_object_or_404(Package.objects, pk=pk), 'form': form, 'error_message': 'Files larger than 3MB are not accepted. If you annotations do exceed 3MB, please contact the administrator.'})
+            mem_data = b''
+            for chunk in mem_file.chunks():
+                mem_data += chunk
+            with transaction.atomic():
+                locked_userpackages = UserPackage.objects.select_for_update().filter(package_id=pk)
+                do_lock = len(locked_userpackages)
+                userpackage = get_object_or_404(locked_userpackages, user_id=request.user.id)
+                userpackage.upload = mem_data
+                exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
+                p = subprocess.Popen([exe, '-s'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                res, junk = p.communicate('%s\n' % base64.b64encode(userpackage.upload))
                 p.wait()
                 assert(p.returncode == 0)
                 res = json.loads(res, encoding='utf-8')
-                assert(res["error"] == 0)
-                userpackage.feedback = json.dumps(res["feedback1"])
-                other.feedback = json.dumps(res["feedback2"])
-                userpackage.save()
-                other.save()
-            return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
+                if (res["error"] != 0):
+                    return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': res["errorMessage"]})
+                res = res["images"]
+                statistics = dict()
+                if False: # check image set
+                    image_diff = set()
+                    for image in userpackage.package.image_set.all():
+                        image_diff.add(image.get_distribute_name())
+                    for image in res:
+                        if image not in image_diff:
+                            return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is not in this package, but you uploaded it.' % image})
+                        image_diff.remove(image)
+                        statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
+                    if len(image_diff) != 0:
+                        return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': 'Rejected: Image-%s is in this package, but you didn\'t upload it.' % image_diff.pop()})
+                else: # do not check image set
+                    for image in res:
+                        statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
+                userpackage.statistics = json.dumps(statistics)
+                other = locked_userpackages.exclude(user_id=request.user.id).order_by('user_id').first()
+                if other and other.upload:
+                    p = subprocess.Popen([exe, '-r', '0.70'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                    res, junk = p.communicate('%s\n%s\n' % (base64.b64encode(userpackage.upload), base64.b64encode(other.upload)))
+                    p.wait()
+                    assert(p.returncode == 0)
+                    res = json.loads(res, encoding='utf-8')
+                    assert(res["error"] == 0)
+                    userpackage.feedback = json.dumps(res["feedback1"])
+                    other.feedback = json.dumps(res["feedback2"])
+                    locked_userpackages.update(feedback='')
+                    userpackage.save()
+                    other.save()
+                else:
+                    userpackage.save()
+                    locked_userpackages.update(feedback='')
+                return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
     else:
+        userpackage = get_object_or_404(request.user.userpackage_set, package_id=pk)
         form = UploadPackageFileForm()
     return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form})
+
+
+@login_required
+def feedback_download(request, pk):
+    userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
+    response = HttpResponse(userpackage.feedback)
+    response['Content-Disposition'] = 'attachment;filename="%s.feedback.json"' % userpackage.package
+    return response
 
 
 class ImageDetailView(LoginRequiredMixin, generic.DetailView):

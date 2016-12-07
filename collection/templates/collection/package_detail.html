@@ -6,6 +6,9 @@
 <div>
 	<p>
 		<a href="{% url 'collection:package_download' package.id %}" class="btn btn-primary" role="button">Download {{ userpackage.package__image__count }} Images</a>
+		{% if userpackage.feedback %}
+		<a href="{% url 'collection:feedback_download' package.id %}" class="btn btn-primary" role="button">Download Feedbacks</a>
+		{% endif %}
 		{% if userpackage.upload %}
 		<a href="{% url 'collection:annotation_download' package.id %}" class="btn btn-primary" role="button">Download Annotations</a>
 		{% endif %}
@@ -28,14 +31,14 @@
 	</thead>
 	<tbody>
 		<tr>
-			<th>{{ statistics.num_image }}</th>
-			<th>{{ statistics.num_block }}</th>
-			<th>{{ statistics.num_character }}</th>
-			<th>{{ statistics.num_error }}</th>
-			<th>{{ statistics.num_miss }}</th>
-			<th>{{ statistics.num_reduntant }}</th>
-			<th>{{ statistics.workload }}</th>
-			<th>{{ statistics.pass }}</th>
+			<td>{{ statistics.num_image }}</td>
+			<td>{{ statistics.num_block }}</td>
+			<td>{{ statistics.num_character }}</td>
+			<td>{{ statistics.num_error }}</td>
+			<td>{{ statistics.num_miss }}</td>
+			<td>{{ statistics.num_reduntant }}</td>
+			<td>{{ statistics.workload }}</td>
+			<td>{{ statistics.pass }}</td>
 		</tr>
 	</tbody>
 </table>
