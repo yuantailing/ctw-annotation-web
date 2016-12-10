@@ -86,7 +86,7 @@
 		<li>不标注全景拼接错误的地方的字。（图片是全景拼接而成的全景图，有一部分拼接错误）<br/><img src="{% static 'collection/img/do-not-annotate-crevice.jpg' %}" />（右边“正宗？驴肉”，问号处本是“河间”，是拼接错误。不标那个地方，只标“河间驴肉”和“正宗驴肉”）</li>
 		<li>不标注太近导致变形的字。<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" />（不标“乡超市欢迎”）<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape-2.jpg' %}" />（不标地面上的“车道”）</li>
 		<li>两个用户标注同一张图片，对于每个字，如果包围盒的overlap小于某个阈值，或输入的字不同，会被交叉验证程序判断成“错标”。交叉验证结果仅供参考。<br/><img src="{% static 'collection/img/explain-overlap.png' %}" />（Overlap (Union) &lt; 66% 判断成错标）</li>
-		<li>如果同一组字里漏标了一部分字，需要重标这组字。<br/>Feedbacks显示：<img src="{% static 'collection/img/do-annotate-feedbacks-feedback.jpg' %}" />（漏标“馆”字）<br/>正确的修改方案：<img src="{% static 'collection/img/do-annotate-feedbacks-in-block.jpg' %}" /><br/>正确的修改方案：<img src="{% static 'collection/img/do-not-annotate-feedbacks-out-of-block.jpg' %}" />（这样就成了两组字“清华园宾”和“馆”，破坏了词组的逻辑性）<br/>错标、多标同理。</li>
+		<li>如果同一组字里漏标了一部分字，需要重标这组字。<br/>Feedbacks显示：<img src="{% static 'collection/img/do-annotate-feedbacks-feedback.jpg' %}" />（漏标“馆”字）<br/>正确的修改方案：<img src="{% static 'collection/img/do-annotate-feedbacks-in-block.jpg' %}" /><br/>错误的修改方案：<img src="{% static 'collection/img/do-not-annotate-feedbacks-out-of-block.jpg' %}" />（这样就成了两组字“清华园宾”和“馆”，破坏了词组的逻辑性）<br/>错标、多标同理。</li>
 		<li>最终会抽查一部分。对于每一处错标、漏标、多标，需要能说明为何坚持自己的判断。</li>
 	</ol>
 </p>
