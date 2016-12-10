@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import models as auth_models
 
 from django.db import transaction
 from django.db.models import Count
@@ -23,7 +22,10 @@ import io
 # Create your views here.
 
 def index(request):
-    return redirect(reverse('collection:package_list'))
+    if request.user.is_authenticated():
+        return redirect(reverse('collection:package_list'))
+    else:
+        return redirect(reverse('collection:help'))
 
 
 @login_required
@@ -86,7 +88,7 @@ def package_detail(request, pk):
     statcnt = num_character + num_miss
     statpass = max(0, statcnt - num_error - num_miss - num_reduntant)
     statistics = {'num_image': num_image, 'num_block': num_block, 'num_character': num_character, 'num_error': num_error, 'num_miss': num_miss, 'num_reduntant': num_reduntant,
-        'workload': num_block * 2 + num_character,'pass': '%.2f %%' % (statpass * 100.0 / statcnt)} if num_character else None
+        'workload': num_block + num_character,'pass': '%.2f %%' % (statpass * 100.0 / statcnt)} if num_character else None
     return render(request, 'collection/package_detail.html', {'userpackage': userpackage, 'image_info': image_info, 'statistics': statistics})
 
 
@@ -154,7 +156,7 @@ def annotation_upload(request, pk):
                     return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': res["errorMessage"]})
                 res = res["images"]
                 statistics = dict()
-                if False: # check image set
+                if True: # check image set
                     image_diff = set()
                     for image in userpackage.package.image_set.all():
                         image_diff.add(image.get_distribute_name())
@@ -171,7 +173,7 @@ def annotation_upload(request, pk):
                 userpackage.statistics = json.dumps(statistics)
                 other = locked_userpackages.exclude(user_id=request.user.id).order_by('user_id').first()
                 if other and other.upload:
-                    p = subprocess.Popen([exe, '-r', '0.70'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                    p = subprocess.Popen([exe, '-r', '0.66'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
                     res, junk = p.communicate('%s\n%s\n' % (base64.b64encode(userpackage.upload), base64.b64encode(other.upload)))
                     p.wait()
                     assert(p.returncode == 0)
@@ -195,7 +197,7 @@ def annotation_upload(request, pk):
 @login_required
 def feedback_download(request, pk):
     userpackage = get_object_or_404(request.user.userpackage_set.select_related('package'), package_id=pk)
-    response = HttpResponse(userpackage.feedback)
+    response = HttpResponse(json.dumps(json.loads(userpackage.feedback)))
     response['Content-Disposition'] = 'attachment;filename="%s.feedback.json"' % userpackage.package
     return response
 

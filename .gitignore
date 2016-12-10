@@ -1,8 +1,8 @@
 *.pyc
 *.log
 
-static/
-media/
+/static/
+/media/
 
-character/settings.py
-db.sqlite3
+/character/settings.py
+/db.sqlite3

@@ -2,11 +2,93 @@
 {% load static %}
 
 {% block content %}
-<h3>标注软件</h3>
-<p>提供 <a href="https://github.com/yuantailing/imageviewer/">源代码</a> 和 Windows 发行版</p>
-<p>从 <a href="https://github.com/yuantailing/imageviewer/releases/latest">Github Release</a> 下载最新的发行版本，或者直接从下面的链接下载<code>v0.0.1</code>发行版</p>
-<ul>
-	<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.1/imageviewer.zip">imageviewer.zip</a></li>
-	<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.1/help.pdf">help.pdf</a></li>
-</ul>
+<h3>网站帮助</h3>
+
+<h4>一、帐号</h4>
+<p>
+	<ol>
+		<li>创建帐号需要联系管理员，提供邮箱。创建后密码为随机值，需要自行重置密码。</li>
+	</ol>
+</p>
+
+<h4>二、标注软件</h4>
+<p>
+	<ol>
+		<li>提供 <a href="https://github.com/yuantailing/imageviewer/">源代码</a> 和 Windows 可执行程序。</li>
+		<li>
+			<p>从 <a href="https://github.com/yuantailing/imageviewer/releases/latest">Github Release</a> 下载最新版本及使用帮助，或者直接从下面的链接下载<code>v0.0.3</code>版本。</p>
+			<p>
+				<ul>
+					<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.3/imageviewer.zip">imageviewer.zip</a></li>
+					<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.3/help.pdf">help.pdf</a></li>
+				</ul>
+			</p>
+		</li>
+	</ol>
+</p>
+
+<h4>三、获取图片包</h4>
+<p>
+	<ol>
+		<li>在 <a href="{% url 'collection:package_list' %}">Packages</a> 页面点击“Ask for more packages”分配一个新的图片任务包。</li>
+		<li>把图片包下载到本地。</li>
+		<li>单个图片包解压到单个文件夹内。不要拆分成多个文件夹，也不要把多个图片包合并到同一个文件夹。</li>
+	</ol>
+</p>
+
+<h4>四、标注任务</h4>
+<p>
+	<ol>
+		<li>根据“标注需求”和标注软件的帮助文档完成标注。</li>
+		<li>用标注软件导出标注，在“Upload Annotations”上传。</li>
+		<li>上传后可以获取下一个图片包。</li>
+	</ol>
+</p>
+
+<h4>五、交叉验证</h4>
+<p>
+	<ol>
+		<li>当另一个领取相同图片包的用户上传了标注时，双方都会得到Feedbacks。</li>
+		<li>在图片包详情页面下载Feedbacks，用标注软件导入它。</li>
+		<li>检查Feedbacks里所有错标、漏标、多标的地方，修改后重新导出、上传。</li>
+	</ol>
+</p>
+
+<h4>六、联系我们</h4>
+<p>
+	<ol>
+		<li>网站管理员：<img src="{% static 'collection/img/admin_email.png' %}" /></li>
+		<li>按上述操作步骤，如遇到任何网站错误、逻辑错误，请联系管理员。</li>
+	</ol>
+</p>
+
+
+<h4>标注需求</h4>
+<p>
+	<ol>
+		<li>连贯的招牌、名称、词组、句子标注在同一组里。</li>
+		<li>包围盒尽量紧贴汉字。<br/>正确：<img src="{% static 'collection/img/do-annotate-tightly.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-slackly.jpg' %}" /></li>
+		<li>但是，汉字必须整体在包围盒内。<br/>错误：<img src="{% static 'collection/img/do-not-annotate-exceed-bounding.jpg' %}" />（包围盒“过紧”，有一部分字露在包围盒外面）</li>
+		<li>对于同一组字，要按阅读顺序标注。</li>
+		<li>对于繁体字，请输入繁体字。<br/><img src="{% static 'collection/img/do-annotate-traditional-chinese.jpg' %}" />（输入“品語服飾”，而不是“品语服饰”）</li>
+		<li>要标注被部分遮挡但仍能识别的字。<br/><img src="{% static 'collection/img/do-annotate-partially-covered.jpg' %}" />（“快”字也要标注）</li>
+		<li>要标注露出一定比例，单字不能识别，但可以联想出来的字。<br/><img src="{% static 'collection/img/do-annotate-associate.jpg' %}" />（“双槐居餐厅”）<br/>包围盒按假想把字补全后的包围盒算：<img src="{% static 'collection/img/do-annotate-associate-complete.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-associate-incomplete.jpg' %}" /></li>
+		<li>对于无法框进一个四边形的一组字，按照标注软件的帮助文档“不规则排版”进行标注。<br/>正确：<img src="{% static 'collection/img/do-annotate-irregular.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-in-quadrangle.jpg' %}" />（强行标进同一个四边形）<br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-separately.jpg' %}" />（没有标在同一组里）</li>
+		<li>对于倾斜程度较大的横排文字，注意按照标注软件里的说明，取消竖直约束。</li>
+		<li>不标注过小、过于模糊导致无法识别的字。<br/><img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" /></li>
+		<li>不标注单独的数字、单词、符号。<br/><img src="{% static 'collection/img/do-not-annotate-numbers.jpg' %}" /><img src="{% static 'collection/img/do-not-annotate-letters.jpg' %}" />（只标“入口”）</li>
+		<li>但是，如果一句话里含数字、单词，那么就标出来。<br/>数字、单词作为一个整体框选出来，而不是每个字母分别框选。<br/><img src="{% static 'collection/img/do-annotate-number-in-block.jpg' %}" />（输入“辉 煌 40 年”，注意空格的用法，详见标注软件的帮助文档）</li>
+		<li>不标注难以分离出单个汉字的商标、招牌。<br/><img src="{% static 'collection/img/do-not-annotate-brand-1.jpg' %}" />（不标左边像“唐”字的商标）<br/><img src="{% static 'collection/img/do-not-annotate-brand-2.jpg' %}" />（“罗曼风情”杂在一起，难以分离）</li>
+		<li>但是，要标注能清晰地分离的艺术字。<br/><img src="{% static 'collection/img/do-annotate-wordart.jpg' %}" />（“酒醉京城”）</li>
+		<li>不标注车牌。<br/><img src="{% static 'collection/img/do-not-annotate-licence-plate.jpg' %}" /></li>
+		<li>不标注全景拼接错误的地方的字。（图片是全景拼接而成的全景图，有一部分拼接错误）<br/><img src="{% static 'collection/img/do-not-annotate-crevice.jpg' %}" />（右边“正宗？驴肉”，问号处本是“河间”，是拼接错误。不标那个地方，只标“河间驴肉”和“正宗驴肉”）</li>
+		<li>不标注太近导致变形的字。<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" />（不标“乡超市欢迎”）</li>
+		<li>两个用户标注同一张图片，对于每个字，如果包围盒的overlap小于某个阈值，或输入的字不同，会被交叉验证程序判断成“错标”。交叉验证结果仅供参考。<br/><img src="{% static 'collection/img/explain-overlap.png' %}" />（Overlap (Union) &lt; 66% 判断成错标）</li>
+		<li>如果同一组字里漏标了一部分字，需要重标这组字。<br/>Feedbacks显示：<img src="{% static 'collection/img/do-annotate-feedbacks-feedback.jpg' %}" />（漏标“馆”字）<br/>正确的修改方案：<img src="{% static 'collection/img/do-annotate-feedbacks-in-block.jpg' %}" /><br/>正确的修改方案：<img src="{% static 'collection/img/do-not-annotate-feedbacks-out-of-block.jpg' %}" />（这样就成了两组字“清华园宾”和“馆”，破坏了词组的逻辑性）<br/>错标、多标同理。</li>
+		<li>最终会抽查一部分。对于每一处错标、漏标、多标，需要能说明为何坚持自己的判断。</li>
+	</ol>
+</p>
+
+<p>&nbsp;</p>
+
 {% endblock %}
