@@ -35,6 +35,8 @@ def ask_for_package(request):
             package = Package.objects.select_for_update().exclude(users__id__contains=request.user.id).annotate(Count('users')).filter(users__count__lt=2).order_by('-users__count', 'direction', 'id').first()
             if request.user.userpackage_set.filter(upload__isnull=True).count() != 0:
                 return render(request, 'collection/ask_for_package.html', {'error_message': 'You forgot to upload annotations to some packages.'})
+            if request.user.userpackage_set.count() == 0:
+                package = Package.objects.filter(id=1).first()
             if not package:
                 return render(request, 'collection/ask_for_package.html', {'error_message': 'No package avaliable, please contact the administrator.'})
             UserPackage.objects.create(user=request.user, package=package)
@@ -181,12 +183,11 @@ def annotation_upload(request, pk):
                     assert(res["error"] == 0)
                     userpackage.feedback = json.dumps(res["feedback1"])
                     other.feedback = json.dumps(res["feedback2"])
-                    locked_userpackages.update(feedback='')
                     userpackage.save()
                     other.save()
                 else:
+                    userpackage.feedback = ''
                     userpackage.save()
-                    locked_userpackages.update(feedback='')
                 return redirect(reverse('collection:package_detail', kwargs={'pk': pk}))
     else:
         userpackage = get_object_or_404(request.user.userpackage_set, package_id=pk)

@@ -30,9 +30,11 @@
 <h4>三、获取图片包</h4>
 <p>
 	<ol>
-		<li>在 <a href="{% url 'collection:package_list' %}">Packages</a> 页面点击“Ask for more packages”分配一个新的图片任务包。</li>
+		<li>在 <a href="{% url 'collection:package_list' %}">Packages</a> 页面点击“Ask for more packages”分配一个新的图片任务包。<br/>
+			注：你获取的第1个图片包是示例图片包，只含3张图片，用于让你熟悉标注软件，上传标注，交叉验证的流程。</li>
 		<li>把图片包下载到本地。</li>
-		<li>单个图片包解压到单个文件夹内。不要拆分成多个文件夹，也不要把多个图片包合并到同一个文件夹。</li>
+		<li>单个图片包解压到单个文件夹内。不要拆分成多个文件夹，也不要把多个图片包合并到同一个文件夹。<br/>
+			Tips：同一个包里的图片的拍摄位置有一定连续性，这是为了方便你根据上下文更迅速地判断出文字。方向（Direction）0表示拍摄角度相对于摄影车前进方向是向后的，1向左，2向前，3向右。</li>
 	</ol>
 </p>
 
@@ -75,14 +77,14 @@
 		<li>要标注露出一定比例，单字不能识别，但可以联想出来的字。<br/><img src="{% static 'collection/img/do-annotate-associate.jpg' %}" />（“双槐居餐厅”）<br/>包围盒按假想把字补全后的包围盒算：<img src="{% static 'collection/img/do-annotate-associate-complete.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-associate-incomplete.jpg' %}" /></li>
 		<li>对于无法框进一个四边形的一组字，按照标注软件的帮助文档“不规则排版”进行标注。<br/>正确：<img src="{% static 'collection/img/do-annotate-irregular.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-in-quadrangle.jpg' %}" />（强行标进同一个四边形）<br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-separately.jpg' %}" />（没有标在同一组里）</li>
 		<li>对于倾斜程度较大的横排文字，注意按照标注软件里的说明，取消竖直约束。</li>
-		<li>不标注过小、过于模糊导致无法识别的字。<br/><img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" /></li>
+		<li>不标注过小、过于模糊和无法识别的字。<br/><img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" /></li>
 		<li>不标注单独的数字、单词、符号。<br/><img src="{% static 'collection/img/do-not-annotate-numbers.jpg' %}" /><img src="{% static 'collection/img/do-not-annotate-letters.jpg' %}" />（只标“入口”）</li>
 		<li>但是，如果一句话里含数字、单词，那么就标出来。<br/>数字、单词作为一个整体框选出来，而不是每个字母分别框选。<br/><img src="{% static 'collection/img/do-annotate-number-in-block.jpg' %}" />（输入“辉 煌 40 年”，注意空格的用法，详见标注软件的帮助文档）</li>
 		<li>不标注难以分离出单个汉字的商标、招牌。<br/><img src="{% static 'collection/img/do-not-annotate-brand-1.jpg' %}" />（不标左边像“唐”字的商标）<br/><img src="{% static 'collection/img/do-not-annotate-brand-2.jpg' %}" />（“罗曼风情”杂在一起，难以分离）</li>
 		<li>但是，要标注能清晰地分离的艺术字。<br/><img src="{% static 'collection/img/do-annotate-wordart.jpg' %}" />（“酒醉京城”）</li>
 		<li>不标注车牌。<br/><img src="{% static 'collection/img/do-not-annotate-licence-plate.jpg' %}" /></li>
 		<li>不标注全景拼接错误的地方的字。（图片是全景拼接而成的全景图，有一部分拼接错误）<br/><img src="{% static 'collection/img/do-not-annotate-crevice.jpg' %}" />（右边“正宗？驴肉”，问号处本是“河间”，是拼接错误。不标那个地方，只标“河间驴肉”和“正宗驴肉”）</li>
-		<li>不标注太近导致变形的字。<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" />（不标“乡超市欢迎”）</li>
+		<li>不标注太近导致变形的字。<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" />（不标“乡超市欢迎”）<br/><img src="{% static 'collection/img/do-not-annotate-out-of-shape-2.jpg' %}" />（不标地面上的“车道”）</li>
 		<li>两个用户标注同一张图片，对于每个字，如果包围盒的overlap小于某个阈值，或输入的字不同，会被交叉验证程序判断成“错标”。交叉验证结果仅供参考。<br/><img src="{% static 'collection/img/explain-overlap.png' %}" />（Overlap (Union) &lt; 66% 判断成错标）</li>
 		<li>如果同一组字里漏标了一部分字，需要重标这组字。<br/>Feedbacks显示：<img src="{% static 'collection/img/do-annotate-feedbacks-feedback.jpg' %}" />（漏标“馆”字）<br/>正确的修改方案：<img src="{% static 'collection/img/do-annotate-feedbacks-in-block.jpg' %}" /><br/>正确的修改方案：<img src="{% static 'collection/img/do-not-annotate-feedbacks-out-of-block.jpg' %}" />（这样就成了两组字“清华园宾”和“馆”，破坏了词组的逻辑性）<br/>错标、多标同理。</li>
 		<li>最终会抽查一部分。对于每一处错标、漏标、多标，需要能说明为何坚持自己的判断。</li>

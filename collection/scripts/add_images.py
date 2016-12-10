@@ -20,7 +20,7 @@ def run(*args):
     ls_folder = map(lambda s: filename_mapper.mapper.old2new[s.split('.')[0]], ls_folder)
     ls_folder.sort()
     for number in ls_folder[lo:hi]:
-        image, created = Image.objects.get_or_create(package=None, direction=direction, number=number)
+        image, created = Image.objects.get_or_create(direction=direction, number=number)
         if created:
             print "[ OK ]\t%d\t%s" % (direction, number)
         else:
