@@ -173,8 +173,8 @@ def annotation_upload(request, pk):
                     for image in res:
                         statistics[image] = {'numBlock': res[image]['numBlock'], 'numCharacter': res[image]['numCharacter']}
                 userpackage.statistics = json.dumps(statistics)
-                other = locked_userpackages.exclude(user_id=request.user.id).order_by('user_id').first()
-                if other and other.upload:
+                other = locked_userpackages.exclude(user_id=request.user.id).filter(upload__isnull=False).order_by('user_id').first()
+                if other:
                     p = subprocess.Popen([exe, '-r', '0.66'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
                     res, junk = p.communicate(base64.b64encode(userpackage.upload) + b'\n' + base64.b64encode(other.upload) + b'\n')
                     p.wait()
