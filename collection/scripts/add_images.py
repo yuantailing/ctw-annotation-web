@@ -8,7 +8,7 @@ import os
 @transaction.atomic
 def run(*args):
     if len(args) != 3:
-        print 'Usage: python manage.py runscript add_images --traceback --script-args <direction> <lo> <hi>'
+        print('Usage: python manage.py runscript add_images --traceback --script-args <direction> <lo> <hi>')
     assert(len(args) == 3)
     direction = int(args[0])
     lo = int(args[1])
@@ -22,6 +22,6 @@ def run(*args):
     for number in ls_folder[lo:hi]:
         image, created = Image.objects.get_or_create(direction=direction, number=number)
         if created:
-            print "[ OK ]\t%d\t%s" % (direction, number)
+            print("[ OK ]\t%d\t%s" % (direction, number))
         else:
-            print "[SKIP]\t%d\t%s" % (direction, number)
+            print("[SKIP]\t%d\t%s" % (direction, number))

@@ -1,4 +1,4 @@
-import filename_mapper
+from . import filename_mapper
 import os
 
 here = os.path.dirname(__file__)
