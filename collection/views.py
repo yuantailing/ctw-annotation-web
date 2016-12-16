@@ -148,12 +148,12 @@ def annotation_upload(request, pk):
                 do_lock = len(locked_userpackages)
                 userpackage = get_object_or_404(locked_userpackages, user_id=request.user.id)
                 userpackage.upload = mem_data
-                exe = os.path.join('..', 'imageviewer', 'dist', 'validation', 'validation')
+                exe = os.path.join(settings.BASE_DIR, '..', 'imageviewer', 'dist', 'validation', 'validation')
                 p = subprocess.Popen([exe, '-s'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                res, junk = p.communicate('%s\n' % base64.b64encode(userpackage.upload))
+                res, junk = p.communicate(base64.b64encode(userpackage.upload) + b'\n')
                 p.wait()
                 assert(p.returncode == 0)
-                res = json.loads(res, encoding='utf-8')
+                res = json.loads(res.decode('utf-8'))
                 if (res["error"] != 0):
                     return render(request, 'collection/annotation_upload.html', {'package': userpackage.package, 'form': form, 'error_message': res["errorMessage"]})
                 res = res["images"]
@@ -176,10 +176,10 @@ def annotation_upload(request, pk):
                 other = locked_userpackages.exclude(user_id=request.user.id).order_by('user_id').first()
                 if other and other.upload:
                     p = subprocess.Popen([exe, '-r', '0.66'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                    res, junk = p.communicate('%s\n%s\n' % (base64.b64encode(userpackage.upload), base64.b64encode(other.upload)))
+                    res, junk = p.communicate(base64.b64encode(userpackage.upload) + b'\n' + base64.b64encode(other.upload) + b'\n')
                     p.wait()
                     assert(p.returncode == 0)
-                    res = json.loads(res, encoding='utf-8')
+                    res = json.loads(res.decode('utf-8'))
                     assert(res["error"] == 0)
                     userpackage.feedback = json.dumps(res["feedback1"])
                     other.feedback = json.dumps(res["feedback2"])
