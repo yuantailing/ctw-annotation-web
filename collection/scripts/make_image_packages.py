@@ -28,7 +28,7 @@ def run(*args):
         images = Image.objects.filter(package=None, direction=direction).order_by('number').values_list('pk', flat=True)
         cnt = 0
         if (len(images) >= package_size):
-            for start in xrange(0, len(images) - package_size + 1, package_size):
+            for start in range(0, len(images) - package_size + 1, package_size):
                 package = Package.objects.create(direction=direction)
                 Image.objects.filter(pk__in=images[start:start + package_size]).update(package=package)
                 cnt += 1

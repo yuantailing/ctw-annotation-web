@@ -27,7 +27,7 @@ class FilenameMapper:
         v.sort()
         old2new = {}
         new2old = {}
-        for i in xrange(0, len(v)):
+        for i in range(0, len(v)):
             name_new = '%06d' % (i + 1)
             old2new[v[i]] = name_new
             new2old[name_new] = v[i]

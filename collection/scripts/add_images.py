@@ -18,6 +18,7 @@ def run(*args):
     ls_folder = os.listdir(folder)
     ls_folder = filter(lambda s: s.lower().endswith('.jpg'), ls_folder)
     ls_folder = map(lambda s: filename_mapper.mapper.old2new[s.split('.')[0]], ls_folder)
+    ls_folder = list(ls_folder)
     ls_folder.sort()
     for number in ls_folder[lo:hi]:
         image, created = Image.objects.get_or_create(direction=direction, number=number)
