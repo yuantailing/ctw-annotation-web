@@ -75,7 +75,7 @@
 		<li>对于繁体字，请输入繁体字。<br/><img src="{% static 'collection/img/do-annotate-traditional-chinese.jpg' %}" />（输入“品語服飾”，而不是“品语服饰”）</li>
 		<li>要标注被部分遮挡但仍能识别的字。<br/><img src="{% static 'collection/img/do-annotate-partially-covered.jpg' %}" />（“快”字也要标注）</li>
 		<li>要标注露出一定比例，单字不能识别，但可以联想出来的字。<br/><img src="{% static 'collection/img/do-annotate-associate.jpg' %}" />（“双槐居餐厅”）<br/>包围盒按假想把字补全后的包围盒算：<img src="{% static 'collection/img/do-annotate-associate-complete.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-associate-incomplete.jpg' %}" /></li>
-		<li>对于无法框进一个四边形的一组字，按照标注软件的帮助文档“不规则排版”进行标注。<br/>正确：<img src="{% static 'collection/img/do-annotate-irregular.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-in-quadrangle.jpg' %}" />（强行标进同一个四边形）<br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-separately.jpg' %}" />（没有标在同一组里）</li>
+		<li>对于无法框进一个四边形的一组字，按照标注软件的帮助文档“不规则排版”进行标注。<br/>正确：<img src="{% static 'collection/img/do-annotate-irregular.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-in-quadrangle.jpg' %}" />（强行标进同一个四边形）<br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-separately.jpg' %}" />（没有标在同一组里）<br/>为了提高标注效率，弧度不是很大的字可以标在同一组里。每个字都要被完整地框在一个框里，不要有部分露在框外。你可能需要多次重画外框，以达到最佳拟合效果。<br/><img src="{% static 'collection/img/do-annotate-arch.jpg' %}" /></li>
 		<li>对于倾斜程度较大的横排文字，注意按照标注软件里的说明，取消竖直约束。</li>
 		<li>不标注过小、过于模糊和无法识别的字。<br/><img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" /></li>
 		<li>不标注单独的数字、单词、符号。<br/><img src="{% static 'collection/img/do-not-annotate-numbers.jpg' %}" /><img src="{% static 'collection/img/do-not-annotate-letters.jpg' %}" />（只标“入口”）</li>
