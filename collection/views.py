@@ -175,7 +175,7 @@ def annotation_upload(request, pk):
                 userpackage.statistics = json.dumps(statistics)
                 other = locked_userpackages.exclude(user_id=request.user.id).filter(upload__isnull=False).order_by('user_id').first()
                 if other:
-                    p = subprocess.Popen([exe, '-r', '0.66'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                    p = subprocess.Popen([exe, '-r', '0.60'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
                     res, junk = p.communicate(base64.b64encode(userpackage.upload) + b'\n' + base64.b64encode(other.upload) + b'\n')
                     p.wait()
                     assert(p.returncode == 0)
