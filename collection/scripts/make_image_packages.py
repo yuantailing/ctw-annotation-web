@@ -21,7 +21,7 @@ def run(*args):
     for direction_obj in direction_set:
         direction  = direction_obj['direction']
         cnt = direction_obj['count_direction']
-        print("direction %d, %d images => %d packages (%d have no package, %d ignored)" % (direction, cnt / package_size * package_size, cnt / package_size, cnt, cnt % package_size))
+        print("direction %d, %d images => %d packages (%d have no package, %d ignored)" % (direction, int(cnt / package_size) * package_size, int(cnt / package_size), cnt, cnt % package_size))
     assert(yesno("confirm?"))
     for direction_obj in direction_set:
         direction  = direction_obj['direction']
@@ -32,4 +32,4 @@ def run(*args):
                 package = Package.objects.create(direction=direction)
                 Image.objects.filter(pk__in=images[start:start + package_size]).update(package=package)
                 cnt += 1
-        assert(cnt == direction_obj['count_direction'] / package_size)
+        assert(cnt == int(direction_obj['count_direction'] / package_size))
