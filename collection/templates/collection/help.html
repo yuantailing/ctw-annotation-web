@@ -61,13 +61,13 @@
 <p>
 	<ol>
 		<li>连贯的招牌、名称、词组、句子标注在同一组里。</li>
-		<li>包围盒尽量紧贴汉字。<br/>正确：<img src="{% static 'collection/img/do-annotate-tightly.jpg' %}" /><img src="{% static 'collection/img/do-annotate-tightly-2.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-slackly.jpg' %}" /></li>
-		<li>但是，汉字必须整体在包围盒内。<br/>错误：<img src="{% static 'collection/img/do-not-annotate-exceed-bounding.jpg' %}" />（包围盒“过紧”，有一部分字露在包围盒外面）</li>
+		<li>包围框尽量紧贴汉字。<br/>正确：<img src="{% static 'collection/img/do-annotate-tightly.jpg' %}" /><img src="{% static 'collection/img/do-annotate-tightly-2.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-slackly.jpg' %}" /></li>
+		<li>但是，汉字必须整体在包围框内。<br/>错误：<img src="{% static 'collection/img/do-not-annotate-exceed-bounding.jpg' %}" />（包围框“过紧”，有一部分字露在包围框外面）</li>
 		<li>对于同一组字，要按阅读顺序标注。（例如上图，标注顺序是 中->铁->工->业->公->司，不要乱序输入）</li>
 		<li>不同大小的字标在不同的组里<br/><img src="{% static 'collection/img/do-annotate-different-size.jpg' %}" />（标成3组字：“蜘蛛王”“皮鞋”“中国驰名商标”）</li>
 		<li>对于繁体字，请输入繁体字。<br/><img src="{% static 'collection/img/do-annotate-traditional-chinese.jpg' %}" />（输入“品語服飾”，而不是“品语服饰”）</li>
 		<li>要标注被部分遮挡但仍能识别的字。<br/><img src="{% static 'collection/img/do-annotate-partially-covered.jpg' %}" />（“快”字也要标注）</li>
-		<li>要标注露出一定比例，单字不能识别，但可以联想出来的字。<br/><img src="{% static 'collection/img/do-annotate-associate.jpg' %}" />（“双槐居餐厅”）<br/>包围盒按假想把字补全后的包围盒算：<img src="{% static 'collection/img/do-annotate-associate-complete.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-associate-incomplete.jpg' %}" /></li>
+		<li>要标注露出一定比例，单字不能识别，但可以联想出来的字。<br/><img src="{% static 'collection/img/do-annotate-associate.jpg' %}" />（“双槐居餐厅”）<br/>包围框按假想把字补全后的包围框算：<img src="{% static 'collection/img/do-annotate-associate-complete.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-associate-incomplete.jpg' %}" /></li>
 		<li>对于无法框进一个四边形的一组字，按照标注软件的帮助文档“不规则排版”进行标注。<br/>正确：<img src="{% static 'collection/img/do-annotate-irregular.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-in-quadrangle.jpg' %}" />（强行标进同一个四边形）<br/>错误：<img src="{% static 'collection/img/do-not-annotate-irregular-separately.jpg' %}" />（没有标在同一组里）<br/>为了节省时间，弧度不是很大的字可以标在同一组里。每个字都要被完整地框在一个框里，不要有部分露在框外。你可能需要多次重画外框，以达到最佳拟合效果。<br/>正确：<img src="{% static 'collection/img/do-annotate-arch.jpg' %}" /></li>
 		<li>对于倾斜程度较大的横排文字，注意按照标注软件里的说明，取消竖直约束。</li>
 		<li>不标注过小、过于模糊和无法识别的字。<br/>不标：<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" /></li>
@@ -81,6 +81,44 @@
 	</ol>
 </p>
 
-<p>&nbsp;</p>
+
+<h4>Mask 标记需求</h4>
+<p>
+	把所有没有标注出来的汉字标记为 Mask（无法辨别）。
+	<ol>
+		<li>一组字只需要一个标记，不要单独标记每一个字。<br/>正确：<img src="{% static 'collection/img/do-mask-as-group.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-mask-as-char.jpg' %}" /></li>
+		<li>高度不同的几组字要分开标记。<br/><img src="{% static 'collection/img/prop-handwritten.jpg' %}" />（红色、白色、黑色的汉字分开标记，一共三组标记）</li>
+		<li>不标记被大面积遮挡的字、残缺的字。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。<br/>不标：<img src="{% static 'collection/img/do-not-mask-incomplete.jpg' %}" /></li>
+		<li>不标记数字、字母。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。</li>
+		<li>不能分辨是否是汉字也可以标记。</li>
+		<li>要标记以下内容：<br/>
+			很小的字：<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" />（不标记数字）<br/>
+			车牌：<img src="{% static 'collection/img/do-not-annotate-licence-plate.jpg' %}" /><br/>
+			因全景拼接错误没标注出来的字：<img src="{% static 'collection/img/do-not-annotate-crevice-3.jpg' %}" /><br/>
+			没有标注出来的艺术字：<img src="{% static 'collection/img/do-not-annotate-brand-2.jpg' %}" /><br/>
+			因模糊没有标出来的字：<img src="{% static 'collection/img/do-mask-illegible.jpg' %}" /><br/>
+			因其它原因没有标注出来的字：<img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" /><br/>
+			</li>
+		<li>不标记太小的字。<br/><img src="{% static 'collection/img/do-not-mask-covered.jpg' %}" />（不标记右边的“元宝？”，要标记左边的“元宝？”，不标记左边“元宝？”两边的小字）</li>
+		<li>如果标注的一组字漏掉了几个字，不要标记为 Mask，而是重新标注这组字。</li>
+	</ol>
+</p>
+
+
+<h4>属性标注需求</h4>
+<p>
+	<ol>
+		<li>为每个已被标注的字（含数字、字母）勾选属性。</li>
+		<li>标注任意一项属性都会自动勾选“标记为‘已经标注属性’”。如果没有任何属性需要勾选，也要勾选这一项，这是为了与未浏览的字区分开。</li>
+		<li>不用标注 Mask 的属性。</li>
+		<li>倾斜示例<img src="{% static 'collection/img/prop-tilted.jpg' %}" />（倾斜指拍照时字没有正对镜头。不是指这种<img src="{% static 'collection/img/prop-not-tilted.jpg' %}" />斜着印刷的字）</li>
+		<li>被遮挡示例<img src="{% static 'collection/img/prop-covered.jpg' %}" /><img src="{% static 'collection/img/prop-raised.jpg' %}" />（只有“养”“殖”勾选“被遮挡”属性，“湘”“湖”“水”“产”“场”不勾选）</li>
+		<li>立体字示例<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /></li>
+		<li>背景复杂示例<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /></li>
+		<li>非规则字体示例<img src="{% static 'collection/img/prop-art.jpg' %}" /><img src="{% static 'collection/img/prop-art-2.jpg' %}" /></li>
+	</ol>
+</p>
+
+<div style="height: 70px; "></div>
 
 {% endblock %}
