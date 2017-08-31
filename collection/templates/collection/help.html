@@ -87,7 +87,7 @@
 	把所有没有标注出来的汉字标记为 Mask（无法辨别）。
 	<ol>
 		<li>一组字只需要一个标记，不要单独标记每一个字。<br/>正确：<img src="{% static 'collection/img/do-mask-as-group.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-mask-as-char.jpg' %}" /></li>
-		<li>高度不同的几组字要分开标记。<br/><img src="{% static 'collection/img/prop-handwritten.jpg' %}" />（红色、白色、黑色的汉字分开标记，一共三组标记）</li>
+		<li>高度不同的几组字要分开标记。<br/><img src="{% static 'collection/img/mask-handwritten.jpg' %}" />（红色、白色、黑色的汉字分开标记，一共三组标记）</li>
 		<li>不标记被大面积遮挡的字、残缺的字。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。<br/>不标：<img src="{% static 'collection/img/do-not-mask-incomplete.jpg' %}" /></li>
 		<li>不标记数字、字母。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。</li>
 		<li>不能分辨是否是汉字也可以标记。</li>
@@ -96,8 +96,8 @@
 			车牌：<img src="{% static 'collection/img/do-not-annotate-licence-plate.jpg' %}" /><br/>
 			因全景拼接错误没标注出来的字：<img src="{% static 'collection/img/do-not-annotate-crevice-3.jpg' %}" /><br/>
 			没有标注出来的艺术字：<img src="{% static 'collection/img/do-not-annotate-brand-2.jpg' %}" /><br/>
-			因模糊没有标出来的字：<img src="{% static 'collection/img/do-mask-illegible.jpg' %}" /><br/>
-			因其它原因没有标注出来的字：<img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" /><br/>
+			因模糊没有标出来的字：<img src="{% static 'collection/img/do-mask-illegible.jpg' %}" /><img src="{% static 'collection/img/do-mask-illegible-2.jpg' %}" />（除“中华老字号”外的两组没标注出来的字）<br/>
+			因其它原因没有标注出来的字：<img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" /><img src="{% static 'collection/img/mask-others.jpg' %}" /><br/>
 			</li>
 		<li>不标记太小的字。<br/><img src="{% static 'collection/img/do-not-mask-covered.jpg' %}" />（不标记右边的“元宝？”，要标记左边的“元宝？”，不标记左边“元宝？”两边的小字）</li>
 		<li>如果标注的一组字漏掉了几个字，不要标记为 Mask，而是重新标注这组字。</li>
@@ -111,11 +111,17 @@
 		<li>为每个已被标注的字（含数字、字母）勾选属性。</li>
 		<li>标注任意一项属性都会自动勾选“标记为‘已经标注属性’”。如果没有任何属性需要勾选，也要勾选这一项，这是为了与未浏览的字区分开。</li>
 		<li>不用标注 Mask 的属性。</li>
-		<li>倾斜示例<img src="{% static 'collection/img/prop-tilted.jpg' %}" />（倾斜指拍照时字没有正对镜头。不是指这种<img src="{% static 'collection/img/prop-not-tilted.jpg' %}" />斜着印刷的字）</li>
-		<li>被遮挡示例<img src="{% static 'collection/img/prop-covered.jpg' %}" /><img src="{% static 'collection/img/prop-raised.jpg' %}" />（只有“养”“殖”勾选“被遮挡”属性，“湘”“湖”“水”“产”“场”不勾选）</li>
-		<li>立体字示例<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /></li>
-		<li>背景复杂示例<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /></li>
-		<li>非规则字体示例<img src="{% static 'collection/img/prop-art.jpg' %}" /><img src="{% static 'collection/img/prop-art-2.jpg' %}" /></li>
+		<li>『线遮挡』指很细的遮挡物穿过汉字，没有遮住汉字的一侧或一个角，示例：<img src="{% static 'collection/img/prop-linecovered.jpg' %}" /><img src="{% static 'collection/img/prop-linecovered-2.jpg' %}" /><img src="{% static 'collection/img/prop-linecovered-3.jpg' %}" />（“地”）</li>
+		<li>『面遮挡』指较宽的遮挡物挡住了汉字的一侧或一个角，示例：<img src="{% static 'collection/img/prop-facecovered.jpg' %}" />（面遮挡：“唐”“集”“公”“司”，线遮挡：“国”）<img src="{% static 'collection/img/prop-facecovered-2.jpg' %}" />（“庙”“吃”）</li>
+		<li>『光影复杂』指字既没有完全在阴影里，又没有完全在阴影外，别的物体的影子投射在字上；而不是指立体字的影子投射在背景上。示例：<img src="{% static 'collection/img/prop-shadowcomplex.jpg' %}" />（“的”）<img src="{% static 'collection/img/prop-shadowcomplex-2.jpg' %}" />（“名”“商”）<img src="{% static 'collection/img/prop-shadowcomplex-3.jpg' %}" />（“包”“容”“厚”“德”）<img src="{% static 'collection/img/prop-shadowcomplex-4.jpg' %}" /><img src="{% static 'collection/img/prop-rotated.jpg' %}" /></li>
+		<li>『背景复杂』示例：<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /><img src="{% static 'collection/img/prop-bgcomplex.jpg' %}" /><img src="{% static 'collection/img/prop-bgcomplex-2.jpg' %}" /></li>
+		<li>『立体字』示例：<img src="{% static 'collection/img/prop-raised.jpg' %}" /><img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" />（只要字本身有厚度，与背景不在同一平面上，就算立体字）</li>
+		<li>『旋转』指不是朝上的，示例：<img src="{% static 'collection/img/prop-rotated.jpg' %}" />（“饼”）<img src="{% static 'collection/img/prop-rotated-2.jpg' %}" />（除了“云”“石”）<img src="{% static 'collection/img/prop-rotated-3.jpg' %}" /></li>
+		<li>『侧视』指拍照时字没有正对镜头，倾角 30° 以上，示例：<img src="{% static 'collection/img/prop-tilted.jpg' %}" /><img src="{% static 'collection/img/prop-tilted-2.jpg' %}" />（左边的“中国石化”）<img src="{% static 'collection/img/prop-tilted-3.jpg' %}" /></li>
+		<li>『扭曲』指印字的布（或其它材料）发生弯曲或扭曲，示例：<img src="{% static 'collection/img/prop-curved.jpg' %}" />（“铁”）<img src="{% static 'collection/img/prop-curved-2.jpg' %}" /><img src="{% static 'collection/img/prop-curved-3.jpg' %}" /><img src="{% static 'collection/img/prop-curved-4.jpg' %}" /><img src="{% static 'collection/img/prop-curved-5.jpg' %}" /></li>
+		<li>『艺术字』示例：<img src="{% static 'collection/img/prop-wordart.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-2.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-3.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-4.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-5.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-6.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-7.jpg' %}" />（“好滋味”是艺术字，“休闲食品”不是）<br/>这些字体、字号、颜色的变化不是艺术字：<img src="{% static 'collection/img/prop-not-wordart.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-2.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-3.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-4.jpg' %}" /></li>
+		<li>『手写』示例：<img src="{% static 'collection/img/prop-handwritten.jpg' %}" /><img src="{% static 'collection/img/prop-handwritten-2.jpg' %}" /><img src="{% static 'collection/img/prop-handwritten-3.jpg' %}" /></li>
+		<li>『污损』示例：<img src="{% static 'collection/img/prop-soiled.jpg' %}" />（“限”“公”“司”）<img src="{% static 'collection/img/prop-soiled-2.jpg' %}" />（“科”“发”“展”）<img src="{% static 'collection/img/prop-curved-3.jpg' %}" /><img src="{% static 'collection/img/prop-curved-4.jpg' %}" />（“烟”）</li>
 	</ol>
 </p>
 
