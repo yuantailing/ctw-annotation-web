@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block content %}
-<h3>网站帮助</h3>
+<h3>帮助</h3>
 
-<h4>一、帐号</h4>
+<!--h4>一、帐号</h4>
 <p>
 	<ol>
 		<li>创建帐号需要联系管理员，这个网站没有注册页面。</li>
@@ -54,8 +54,27 @@
 		<li>按上述操作步骤，如遇到任何网站错误、逻辑错误，请联系管理员。</li>
 		<li>标注软件使用问题也联系网站管理员。</li>
 	</ol>
-</p>
+</p-->
 
+<h4>标注软件说明</h4>
+<p>
+	<ol>
+		<li>提供 <a href="https://github.com/yuantailing/imageviewer/">源代码</a> 和 Windows 可执行程序。</li>
+		<li>
+			<p>从 <a href="https://github.com/yuantailing/imageviewer/releases/latest">Github Release</a> 下载最新版本及使用帮助，或者直接从下面的链接下载<code>v0.0.7</code>版本。</p>
+			<p>
+				<ul>
+					<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.7/imageviewer.zip">imageviewer.zip</a></li>
+					<li><a href="https://github.com/yuantailing/imageviewer/releases/download/v0.0.7/help.pdf">help.pdf</a></li>
+				</ul>
+			</p>
+		</li>
+		<li>请不要修改图片的文件名。</li>
+		<li>Tips：文件名相邻的图片大概率是连续拍摄的，这可以方便你根据上下文更迅速地判断出文字。</li>
+		<li>Tips：文件名的第一位是『方向』，0 表示拍摄角度相对于摄影车前进方向是向后的，1 向左，2 向前，3 向右。</li>
+		<li>遇到问题请联系<img src="{% static 'collection/img/admin_email.png' %}" />。</li>
+	</ol>
+</p>
 
 <h4>标注需求</h4>
 <p>
@@ -84,23 +103,22 @@
 
 <h4>Mask 标记需求</h4>
 <p>
-	把所有没有标注出来的汉字标记为 Mask（无法辨别）。
+	把所有没有标注出来的汉字标记为 Mask（无法辨别）。『标注』和『标记』必须覆盖所有能看清、能勉强看清的汉字，以及与之等大小的汉字。图片上既没标注又没标记的区域不能有任何可识别的汉字。
 	<ol>
 		<li>一组字只需要一个标记，不要单独标记每一个字。<br/>正确：<img src="{% static 'collection/img/do-mask-as-group.jpg' %}" /><br/>错误：<img src="{% static 'collection/img/do-not-mask-as-char.jpg' %}" /></li>
 		<li>高度不同的几组字要分开标记。<br/><img src="{% static 'collection/img/mask-handwritten.jpg' %}" />（红色、白色、黑色的汉字分开标记，一共三组标记）</li>
-		<li>不标记被大面积遮挡的字、残缺的字。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。<br/>不标：<img src="{% static 'collection/img/do-not-mask-incomplete.jpg' %}" /></li>
-		<li>不标记数字、字母。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。</li>
+		<li>不标记遮挡、残缺面积大于 50% 的字。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。<br/>例：<img src="{% static 'collection/img/do-not-mask-incomplete.jpg' %}" />（只标“化”）<img src="{% static 'collection/img/mask-inner-incomplete.jpg' %}" />（用一个框标记出来，不用特意避开“菜”而变成两个框）</li>
+		<li>不标记数字、字母、标点符号。但是如果它们跟需要标记的字是同一组字，那么也可以标记出来，不用特意避开。<br/>例：<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" />（不标记那排数字）<img src="{% static 'collection/img/mask-inner-number.jpg' %}" />（用一个框标记出来，不用特意避开标点符号和数字）</li>
 		<li>不能分辨是否是汉字也可以标记。</li>
 		<li>要标记以下内容：<br/>
-			很小的字：<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" />（不标记数字）<br/>
+			很小的字：<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" />（图中有 4 排字，标记第 1 排字，不标记第 2 排数字，不标记第 3、4 排太小的字。原则是『标记』必须囊括所有能看清、能勉强看清的汉字，以及与之等大小的汉字。其中“广”（或“厂”）字能勉强看清，说明这种大小的字在这种角度、背景上是需要标记出来的）<br/>
 			车牌：<img src="{% static 'collection/img/do-not-annotate-licence-plate.jpg' %}" /><br/>
 			因全景拼接错误没标注出来的字：<img src="{% static 'collection/img/do-not-annotate-crevice-3.jpg' %}" /><br/>
 			没有标注出来的艺术字：<img src="{% static 'collection/img/do-not-annotate-brand-2.jpg' %}" /><br/>
 			因模糊没有标出来的字：<img src="{% static 'collection/img/do-mask-illegible.jpg' %}" /><img src="{% static 'collection/img/do-mask-illegible-2.jpg' %}" />（除“中华老字号”外的两组没标注出来的字）<br/>
 			因其它原因没有标注出来的字：<img src="{% static 'collection/img/do-not-annotate-out-of-shape.jpg' %}" /><img src="{% static 'collection/img/mask-others.jpg' %}" /><br/>
 			</li>
-		<li>不标记太小的字。<br/><img src="{% static 'collection/img/do-not-mask-covered.jpg' %}" />（不标记右边的“元宝？”，要标记左边的“元宝？”，不标记左边“元宝？”两边的小字）</li>
-		<li>如果标注的一组字漏掉了几个字，不要标记为 Mask，而是重新标注这组字。</li>
+		<li>不标记太小的字。<img src="{% static 'collection/img/do-not-mask-covered.jpg' %}" />（不标记右边的“元宝？”，要标记左边的“元宝？”，不标记左边“元宝？”两旁的小字）<img src="{% static 'collection/img/do-not-annotate-too-small.jpg' %}" />（图中有 4 排字，第 3、4 排太小不标记）</li>
 	</ol>
 </p>
 
@@ -116,9 +134,9 @@
 		<li>『光影复杂』指字既没有完全在阴影里，又没有完全在阴影外，别的物体的影子投射在字上；而不是指立体字的影子投射在背景上。示例：<img src="{% static 'collection/img/prop-shadowcomplex.jpg' %}" />（“的”）<img src="{% static 'collection/img/prop-shadowcomplex-2.jpg' %}" />（“名”“商”）<img src="{% static 'collection/img/prop-shadowcomplex-3.jpg' %}" />（“包”“容”“厚”“德”）<img src="{% static 'collection/img/prop-shadowcomplex-4.jpg' %}" /><img src="{% static 'collection/img/prop-rotated.jpg' %}" /></li>
 		<li>『背景复杂』示例：<img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" /><img src="{% static 'collection/img/prop-bgcomplex.jpg' %}" /><img src="{% static 'collection/img/prop-bgcomplex-2.jpg' %}" /></li>
 		<li>『立体字』示例：<img src="{% static 'collection/img/prop-raised.jpg' %}" /><img src="{% static 'collection/img/prop-raised-2.jpg' %}" /><img src="{% static 'collection/img/prop-raised-3.jpg' %}" />（只要字本身有厚度，与背景不在同一平面上，就算立体字）</li>
-		<li>『旋转』指不是朝上的，示例：<img src="{% static 'collection/img/prop-rotated.jpg' %}" />（“饼”）<img src="{% static 'collection/img/prop-rotated-2.jpg' %}" />（除了“云”“石”）<img src="{% static 'collection/img/prop-rotated-3.jpg' %}" /></li>
 		<li>『侧视』指拍照时字没有正对镜头，倾角 30° 以上，示例：<img src="{% static 'collection/img/prop-tilted.jpg' %}" /><img src="{% static 'collection/img/prop-tilted-2.jpg' %}" />（左边的“中国石化”）<img src="{% static 'collection/img/prop-tilted-3.jpg' %}" /></li>
 		<li>『扭曲』指印字的布（或其它材料）发生弯曲或扭曲，示例：<img src="{% static 'collection/img/prop-curved.jpg' %}" />（“铁”）<img src="{% static 'collection/img/prop-curved-2.jpg' %}" /><img src="{% static 'collection/img/prop-curved-3.jpg' %}" /><img src="{% static 'collection/img/prop-curved-4.jpg' %}" /><img src="{% static 'collection/img/prop-curved-5.jpg' %}" /></li>
+		<li>『旋转』指不是朝上的，示例：<img src="{% static 'collection/img/prop-rotated.jpg' %}" />（“饼”）<img src="{% static 'collection/img/prop-rotated-2.jpg' %}" />（除了“云”“石”）<img src="{% static 'collection/img/prop-rotated-3.jpg' %}" /></li>
 		<li>『艺术字』示例：<img src="{% static 'collection/img/prop-wordart.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-2.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-3.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-4.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-5.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-6.jpg' %}" /><img src="{% static 'collection/img/prop-wordart-7.jpg' %}" />（“好滋味”是艺术字，“休闲食品”不是）<br/>这些字体、字号、颜色的变化不是艺术字：<img src="{% static 'collection/img/prop-not-wordart.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-2.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-3.jpg' %}" /><img src="{% static 'collection/img/prop-not-wordart-4.jpg' %}" /></li>
 		<li>『手写』示例：<img src="{% static 'collection/img/prop-handwritten.jpg' %}" /><img src="{% static 'collection/img/prop-handwritten-2.jpg' %}" /><img src="{% static 'collection/img/prop-handwritten-3.jpg' %}" /></li>
 		<li>『污损』示例：<img src="{% static 'collection/img/prop-soiled.jpg' %}" />（“限”“公”“司”）<img src="{% static 'collection/img/prop-soiled-2.jpg' %}" />（“科”“发”“展”）<img src="{% static 'collection/img/prop-curved-3.jpg' %}" /><img src="{% static 'collection/img/prop-curved-4.jpg' %}" />（“烟”）</li>
